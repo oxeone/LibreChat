@@ -1,6 +1,4 @@
 import { Schema, Document, Types } from 'mongoose';
-
-// @ts-ignore
 export interface IAgent extends Omit<Document, 'model'> {
   id: string;
   name?: string;
@@ -15,6 +13,7 @@ export interface IAgent extends Omit<Document, 'model'> {
   model_parameters?: Record<string, unknown>;
   artifacts?: string;
   access_level?: number;
+  recursion_limit?: number;
   tools?: string[];
   tool_kwargs?: Array<unknown>;
   actions?: string[];
@@ -47,10 +46,7 @@ const agentSchema = new Schema<IAgent>(
       type: String,
     },
     avatar: {
-      type: {
-        filepath: String,
-        source: String,
-      },
+      type: Schema.Types.Mixed,
       default: undefined,
     },
     provider: {
@@ -68,6 +64,9 @@ const agentSchema = new Schema<IAgent>(
       type: String,
     },
     access_level: {
+      type: Number,
+    },
+    recursion_limit: {
       type: Number,
     },
     tools: {
