@@ -2694,7 +2694,13 @@ header{
    display:none !important;
 }
 
-#root > div:first-of-type {
+#root > div:first-of-type::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* shorthand for top/right/bottom/left: 0 */
   background: url(/assets/auth-bg.jpg) no-repeat;
   background-size: cover;
+  background-position: center;
+  opacity: 0.3; /* only fades the background */
+  z-index: -1;
 }
