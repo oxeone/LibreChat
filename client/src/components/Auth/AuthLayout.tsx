@@ -58,7 +58,7 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="relative flex flex-grow items-center justify-center min-h-screen flex-col bg-white dark:bg-gray-900">
       <Banner />
       <BlinkAnimation active={isFetching}>
             <div className="mt-6 h-16 w-full bg-cover">
@@ -74,7 +74,7 @@ function AuthLayout({
         <ThemeSelector />
       </div>
 
-      <div className="flex flex-grow items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
           {!hasStartupConfigError && !isFetching && (
             <h1
