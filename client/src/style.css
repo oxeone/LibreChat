@@ -2693,3 +2693,8 @@ header{
   position:fixed;
    display:none !important;
 }
+
+#root > div:first-of-type {
+  background: url(/assets/auth-bg.jpg) no-repeat;
+  background-size: cover;
+}
