@@ -1,5 +1,12 @@
 [
   {
+    "name": "CVRSearch",
+    "pluginKey": "cvr_search",
+    "description": "Perform simple cvr lookup for nordic countries",
+    "icon": "https://i.imgur.com/RHsSG5h.png",
+    "authConfig": []
+  },
+  {
     "name": "Traversaal",
     "pluginKey": "traversaal_search",
     "description": "Traversaal is a robust search API tailored for LLM Agents. Get an API key here: https://api.traversaal.ai",
@@ -178,12 +185,5 @@
         "description": "Provide your Flux API key from your user profile."
       }
     ]
-  },
-  {
-    "name": "CVRSearch",
-    "pluginKey": "cvr_search",
-    "description": "Perform simple cvr lookup for nordic countries",
-    "icon": "https://i.imgur.com/RHsSG5h.png",
-    "authConfig": []
   }
 ]
