@@ -38,10 +38,6 @@ const options = [
     value: 'ads',
   },
   {
-    label: 'com_ui_customer_research',
-    value: 'customer_research',
-  },
-  {
     label: 'com_ui_code',
     value: 'code',
   },

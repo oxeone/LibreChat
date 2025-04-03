@@ -26,7 +26,7 @@ const categoryIconMap: Record<string, React.ElementType> = {
   copywriting: LightbulbIcon,
   email_marketing: BoxIcon,
   social_media: BoxIcon,
-  content_strategy: BoxIcon,
+  content_strategy: GraduationCapIcon,
   seo: PenLineIcon,
   ads: Dices,
   customer_research: GraduationCapIcon,
