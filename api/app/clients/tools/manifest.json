@@ -178,5 +178,12 @@
         "description": "Provide your Flux API key from your user profile."
       }
     ]
+  },
+  {
+    "name": "CVR Search",
+    "pluginKey": "cvr_search",
+    "description": "Perform simple cvr lookup for nordic countries",
+    "icon": "https://i.imgur.com/RHsSG5h.png",
+    "authConfig": []
   }
 ]
