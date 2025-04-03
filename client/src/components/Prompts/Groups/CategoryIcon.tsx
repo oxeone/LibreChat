@@ -22,6 +22,16 @@ const categoryIconMap: Record<string, React.ElementType> = {
   code: TerminalSquareIcon,
   travel: PlaneTakeoffIcon,
   teach_or_explain: GraduationCapIcon,
+  branding: PenLineIcon,
+  copywriting: PenLineIcon,
+  email_marketing: PenLineIcon,
+  social_media: PenLineIcon,
+  content_strategy: PenLineIcon,
+  seo: PenLineIcon,
+  ads: PenLineIcon,
+  customer_research: PenLineIcon,
+  product_marketing: PenLineIcon,
+  marketing_analytics: PenLineIcon,
 };
 
 const categoryColorMap: Record<string, string> = {
@@ -34,6 +44,16 @@ const categoryColorMap: Record<string, string> = {
   finance: 'text-orange-400',
   roleplay: 'text-orange-400',
   teach_or_explain: 'text-blue-300',
+  branding: 'text-yellow-500',
+  copywriting: 'text-purple-500',
+  email_marketing: 'text-pink-400',
+  social_media: 'text-blue-400',
+  content_strategy: 'text-green-400',
+  seo: 'text-indigo-400',
+  ads: 'text-red-400',
+  customer_research: 'text-teal-400',
+  product_marketing: 'text-orange-300',
+  marketing_analytics: 'text-green-500',
 };
 
 export default function CategoryIcon({
