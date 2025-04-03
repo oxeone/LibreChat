@@ -22,7 +22,7 @@ class CVRSearch extends Tool {
       query: z
         .string()
         .describe(
-          'A properly written sentence (or just the 8-digit CVR) to be interpreted by the AI to search the web (CVR) according to the user\'s request. It must be exactly 8 digits if you are looking up a specific CVR number.',
+          ' 8-digit CVR. It must be exactly 8 digits if you are looking up a specific CVR number.',
         ),
     });
 

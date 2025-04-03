@@ -180,7 +180,7 @@
     ]
   },
   {
-    "name": "CVR Search",
+    "name": "CVRSearch",
     "pluginKey": "cvr_search",
     "description": "Perform simple cvr lookup for nordic countries",
     "icon": "https://i.imgur.com/RHsSG5h.png",
