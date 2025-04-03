@@ -28,7 +28,6 @@ endpoints:
       modelDisplayLabel: "Marginal Firma Agent"
       iconURL: "/assets/logo.svg"
 
-
     # Marginal Agent Custom AI webhook endpoint
     ##
     ##- name: "demon8n"
