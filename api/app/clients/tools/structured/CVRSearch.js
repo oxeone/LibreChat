@@ -12,7 +12,7 @@ class CVRSearch extends Tool {
   }
   constructor(fields) {
     super(fields);
-    this.name = 'm_analytics';
+    this.name = 'cvr_search';
     // UPDATED DESCRIPTION:
     this.description = `A tool for searching the Danish CVR registry by an 8-digit company CVR number. Provide an 8-digit number as the query to fetch company data.`;
     // UPDATED DESCRIPTION FOR MODEL:
@@ -84,7 +84,7 @@ class CVRSearch extends Tool {
             } else {
               return `${indent}**${formattedKey}**: ${value}`;
             }
-          })                                                                                                            
+          })
           .join('\n');
       };
   
