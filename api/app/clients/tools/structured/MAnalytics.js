@@ -42,11 +42,11 @@ class MAnalytics extends Tool {
   
     try {
       const response = await fetch(apiUrl, {
-        method: 'POST', // Brug POST-metoden til at sende data i body
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(input), // Send inputdata i body
+        body: JSON.stringify(input),
       });
   
       if (!response.ok) {
@@ -55,31 +55,34 @@ class MAnalytics extends Tool {
   
       const data = await response.json();
   
-      // Antager, at data er en liste med objekter, der har en 'output' nøgle
-      if (Array.isArray(data) && data.length > 0 && data[0].output) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: data[0].output
-            }
-          ]
-        };
+      if (data && data.output) {
+        return [
+          {
+            content: [
+              {
+                type: 'text',
+                text: data.output
+              }
+            ]
+          }
+        ];
       } else {
         throw new Error('Ugyldigt API-svar: Mangler forventet output.');
       }
     } catch (error) {
       logger.error('MAnalytics API-anmodning mislykkedes', error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Fejl i MAnalytics: ${error.message}`
-          }
-        ]
-      };
+      return [
+        {
+          content: [
+            {
+              type: 'text',
+              text: `Fejl i MAnalytics: ${error.message}`
+            }
+          ]
+        }
+      ];
     }
-  }  
+  }   
 }
 
 module.exports = MAnalytics;
