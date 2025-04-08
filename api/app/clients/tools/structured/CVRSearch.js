@@ -41,50 +41,59 @@ class CVRSearch extends Tool {
 
   // eslint-disable-next-line no-unused-vars
   async _call({ query }, _runManager) {
-    const body = {
-      query: [query],
-    };
+    const apiUrl = `https://cvrapi.dk/api?search=${query}&country=dk`;
+  
     try {
-      // UPDATED FETCH URL:
-      const response = await fetch(`https://cvrapi.dk/api?search=${query}&country=dk`, {
-        method: 'POST',
+      const response = await fetch(apiUrl, {
+        method: 'GET',
         headers: {
-          'content-type': 'application/json',
-          //'x-api-key': this.apiKey,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...body }),
       });
-      const json = await response.json();
+  
       if (!response.ok) {
-        throw new Error(
-          `Request failed with status code ${response.status}: ${json.error ?? json.message}`,
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (!data || !data.name) {
+        throw new Error('Invalid API response: Missing company information.');
+      }
+  
+      // Function to remove empty properties
+      const removeEmptyProperties = (obj) => {
+        return Object.fromEntries(
+          Object.entries(obj)
+            .filter(([_, v]) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0))
+            .map(([k, v]) => [k, v === Object(v) ? removeEmptyProperties(v) : v])
         );
-      }
-      if (!json.data) {
-        throw new Error('Could not parse CVRSearch API results. Please try again.');
-      }
-
-      const baseText = json.data?.response_text ?? '';
-      const sources = json.data?.web_url;
-      const noResponse = 'No response found in CVRSearch API results';
-
-      if (!baseText && !sources) {
-        return noResponse;
-      }
-
-      const sourcesText = sources?.length ? '\n\nSources:\n - ' + sources.join('\n - ') : '';
-      const result = baseText + sourcesText;
-
-      if (!result) {
-        return noResponse;
-      }
-
-      return result;
+      };
+  
+      const cleanedData = removeEmptyProperties(data);
+  
+      // Formatting the output
+      const formatData = (obj, indent = '') => {
+        return Object.entries(obj)
+          .map(([key, value]) => {
+            const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            if (typeof value === 'object' && !Array.isArray(value)) {
+              return `${indent}**${formattedKey}**:\n${formatData(value, indent + '  ')}`;
+            } else if (Array.isArray(value)) {
+              return `${indent}**${formattedKey}**:\n${value.map(item => `${indent}- ${item}`).join('\n')}`;
+            } else {
+              return `${indent}**${formattedKey}**: ${value}`;
+            }
+          })
+          .join('\n');
+      };
+  
+      return formatData(cleanedData);
     } catch (error) {
       logger.error('CVRSearch API request failed', error);
-      return `CVRSearch API request failed: ${error.message}`;
+      return `Error CVR: ${error.message}`;
     }
-  }
+  }  
 }
 
 module.exports = CVRSearch;
