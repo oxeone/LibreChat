@@ -18,6 +18,7 @@ const {
   StructuredWolfram,
   createYouTubeTools,
   TavilySearchResults,
+  CVRSearch,
 } = require('../');
 const { primeFiles: primeCodeFiles } = require('~/server/services/Files/Code/process');
 const { createFileSearchTool, primeFiles: primeSearchFiles } = require('./fileSearch');
