@@ -12,6 +12,7 @@ const GoogleSearchAPI = require('./structured/GoogleSearch');
 const TraversaalSearch = require('./structured/TraversaalSearch');
 const TavilySearchResults = require('./structured/TavilySearchResults');
 const CVRSearch = require('./structured/CVRSearch');
+const MAnalytics = require('./structured/MAnalytics');
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};
@@ -42,4 +43,5 @@ module.exports = {
   createYouTubeTools,
   TavilySearchResults,
   CVRSearch,
+  MAnalytics,
 };

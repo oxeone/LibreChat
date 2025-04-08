@@ -19,6 +19,7 @@ const {
   createYouTubeTools,
   TavilySearchResults,
   CVRSearch,
+  MAnalytics,
 } = require('../');
 const { primeFiles: primeCodeFiles } = require('~/server/services/Files/Code/process');
 const { createFileSearchTool, primeFiles: primeSearchFiles } = require('./fileSearch');
@@ -156,6 +157,7 @@ const loadTools = async ({
     traversaal_search: TraversaalSearch,
     tavily_search_results_json: TavilySearchResults,
     cvr_search: CVRSearch,
+    m_analytics: MAnalytics,
   };
 
   const customConstructors = {
