@@ -13,7 +13,7 @@ const StructuredSD = require('./structured/StableDiffusion');
 const GoogleSearchAPI = require('./structured/GoogleSearch');
 const TraversaalSearch = require('./structured/TraversaalSearch');
 const TavilySearchResults = require('./structured/TavilySearchResults');
-const CVRSearch = require('./structured/CVRSearch');
+
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};
@@ -43,5 +43,4 @@ module.exports = {
   StructuredWolfram,
   createYouTubeTools,
   TavilySearchResults,
-  CVRSearch,
 };
