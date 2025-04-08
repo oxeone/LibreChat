@@ -1,6 +1,5 @@
 const { validateTools, loadTools } = require('./handleTools');
 const handleOpenAIErrors = require('./handleOpenAIErrors');
-<<<<<<< HEAD
 const availableTools = require('./manifest.json');
 
 // Structured Tools
@@ -44,11 +43,4 @@ module.exports = {
   StructuredWolfram,
   createYouTubeTools,
   TavilySearchResults,
-=======
-
-module.exports = {
-  handleOpenAIErrors,
-  validateTools,
-  loadTools,
->>>>>>> parent of 51223b30 (CVR Tool)
 };
