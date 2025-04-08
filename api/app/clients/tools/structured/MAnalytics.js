@@ -1,88 +1,56 @@
 const { z } = require('zod');
 const { Tool } = require('@langchain/core/tools');
-const { getEnvironmentVariable } = require('@langchain/core/utils/env');
 const { logger } = require('~/config');
 
 /**
- * Tool for the MAnalytics search API.
+ * Værktøj til MAnalytics API.
  */
 class MAnalytics extends Tool {
   static lc_name() {
     return 'MAnalytics';
   }
+
   constructor(fields) {
     super(fields);
     this.name = 'm_analytics';
-    // UPDATED DESCRIPTION:
-    this.description = `A tool for searching Google Analytics Reports. Get data from Analytics accounts based on `;
-    // UPDATED DESCRIPTION FOR MODEL:
-    this.description_for_model = 'This tool enables users to search and retrieve data from Google Analytics reports. By specifying parameters such as client name or URL, users can access detailed analytics data from their Google Analytics accounts. Input the desired client name or URL as the "query" field in the input JSON. The tool will return relevant analytics data for the specified client, facilitating comprehensive analysis of website or application performance.';
+    this.description = 'Et værktøj til at søge i Google Analytics-rapporter baseret på klientnavn eller URL.';
+    this.description_for_model = 'Dette værktøj gør det muligt for brugere at søge og hente data fra Google Analytics-rapporter. Ved at angive parametre som klientnavn eller URL kan brugere få adgang til detaljerede analytics-data fra deres Google Analytics-konti. Indtast det ønskede klientnavn eller URL som "query"-feltet i input JSON. Værktøjet returnerer relevante analytics-data for den specificerede klient, hvilket letter en omfattende analyse af webstedets eller applikationens ydeevne.';
     this.schema = z.object({
       query: z
         .string()
-        .describe('Client name or URL to get Google Analytics data reports.'),
+        .describe('Klientnavn eller URL for at hente Google Analytics-data.'),
     });
-
-    //this.apiKey = fields?.TRAVERSAAL_API_KEY ?? this.getApiKey();
   }
 
-  /*getApiKey() {
-    const apiKey = getEnvironmentVariable('TRAVERSAAL_API_KEY');
-    if (!apiKey && this.override) {
-      throw new Error(
-        'No Traversaal API key found. Either set an environment variable named "TRAVERSAAL_API_KEY" or pass an API key as "apiKey".',
-      );
-    }
-    return apiKey;
-  }*/
-
   // eslint-disable-next-line no-unused-vars
-  async _call(input, _runManager) {
+  async _call({ query }, _runManager) {
     const apiUrl = 'https://margial.app.n8n.cloud/webhook-test/e9df69a4-1e32-47ee-9fcc-35b479b34ba2';
-  
+
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ query }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`API-anmodning mislykkedes med status ${response.status}`);
       }
-  
+
       const data = await response.json();
-  
-      if (data && data.output) {
-        return [
-          {
-            content: [
-              {
-                type: 'text',
-                text: data.output
-              }
-            ]
-          }
-        ];
-      } else {
+
+      if (!data || !data.output) {
         throw new Error('Ugyldigt API-svar: Mangler forventet output.');
       }
+
+      return data.output;
     } catch (error) {
       logger.error('MAnalytics API-anmodning mislykkedes', error);
-      return [
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Fejl i MAnalytics: ${error.message}`
-            }
-          ]
-        }
-      ];
+      return `Fejl i MAnalytics: ${error.message}`;
     }
-  }   
+  }
 }
 
 module.exports = MAnalytics;
