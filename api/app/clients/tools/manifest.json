@@ -1,5 +1,13 @@
 [
   {
+    "name": "Marginal - Drive",
+    "pluginKey": "m_drive",
+    "description": "Google Drive actions agent.",
+    "icon": "https://i.imgur.com/RHsSG5h.png",
+    "isAuthRequired": "false",
+    "authConfig": []
+  },
+  {
     "name": "Marginal - Analytics demo",
     "pluginKey": "m_analytics",
     "description": "Get analytics data from an N8N agent.",

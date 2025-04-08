@@ -13,6 +13,7 @@ const TraversaalSearch = require('./structured/TraversaalSearch');
 const TavilySearchResults = require('./structured/TavilySearchResults');
 const CVRSearch = require('./structured/CVRSearch');
 const MAnalytics = require('./structured/MAnalytics');
+const MDrive = require('./structured/MDrive');
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};
@@ -44,4 +45,5 @@ module.exports = {
   TavilySearchResults,
   CVRSearch,
   MAnalytics,
+  MDrive,
 };
