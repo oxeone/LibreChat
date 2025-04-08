@@ -56,10 +56,24 @@ class MAnalytics extends Tool {
       const data = await response.json();
   
       // Format the response to match the expected output schema
-      return [{ output: data.message }];
+      return {
+        content: [
+          {
+            type: 'text',
+            text: data.message
+          }
+        ]
+      };
     } catch (error) {
       logger.error('MAnalytics API request failed', error);
-      return [{ output: `Error MAnalytics: ${error.message}` }];
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error MAnalytics: ${error.message}`
+          }
+        ]
+      };
     }
   }  
 }
