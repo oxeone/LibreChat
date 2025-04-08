@@ -42,35 +42,39 @@ class MAnalytics extends Tool {
   
     try {
       const response = await fetch(apiUrl, {
-        method: 'POST', // Use POST method to send data in the body
+        method: 'POST', // Brug POST-metoden til at sende data i body
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(input), // Send the input data in the body
+        body: JSON.stringify(input), // Send inputdata i body
       });
   
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        throw new Error(`API-anmodning mislykkedes med status ${response.status}`);
       }
   
       const data = await response.json();
   
-      // Format the response to match the expected output schema
-      return {
-        content: [
-          {
-            type: 'text',
-            text: data.message
-          }
-        ]
-      };
+      // Antager, at data er en liste med objekter, der har en 'output' nøgle
+      if (Array.isArray(data) && data.length > 0 && data[0].output) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: data[0].output
+            }
+          ]
+        };
+      } else {
+        throw new Error('Ugyldigt API-svar: Mangler forventet output.');
+      }
     } catch (error) {
-      logger.error('MAnalytics API request failed', error);
+      logger.error('MAnalytics API-anmodning mislykkedes', error);
       return {
         content: [
           {
             type: 'text',
-            text: `Error MAnalytics: ${error.message}`
+            text: `Fejl i MAnalytics: ${error.message}`
           }
         ]
       };
