@@ -26,7 +26,7 @@ class MDrive extends Tool {
 
   // eslint-disable-next-line no-unused-vars
   async _call({ query }, _runManager) {
-    const apiUrl = 'https://margial.app.n8n.cloud/webhook-test/1d3fc122-0f1c-4491-9bc8-429c5863a8dd';
+    const apiUrl = 'https://margial.app.n8n.cloud/webhook/1d3fc122-0f1c-4491-9bc8-429c5863a8dd';
 
     try {
       const response = await fetch(apiUrl, {
