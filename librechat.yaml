@@ -46,25 +46,6 @@ endpoints:
       modelDisplayLabel: "Marginal Firma Agent"
       iconURL: "/assets/logo.svg"
 
-    # Marginal Agent Custom AI webhook endpoint
-    ##
-    ##- name: "demon8n"
-    ##  apiKey: "${MARGINAL_API_KEY}"
-    ##  baseURL: "https://2f268db7-d6b5-45cf-8323-43e63bd9d120.mock.pstmn.io"
-    ##  directEndpoint: true
-    ##  models:
-    ##    default:
-    ##      - "firma"
-    ##    fetch: false
-    ##  titleConvo: true
-    ##  summarize: false
-    ##  forcePrompt: true
-    ##  stream: false
-    ##  disableHistory: true
-    ##  modelDisplayLabel: "Demo N8N"
-    ##  iconURL: "/assets/logo.svg"
-    ##  dropParams: ["stop", "user", "frequency_penalty", "presence_penalty"]
-
     # cohere
     # Model list: https://dashboard.cohere.com/playground/chat
     - name: "cohere"
@@ -177,7 +158,7 @@ modelSpecs:
       description: "Perplexity's Sonar model for real-time, web-wide research and Q&A capabilities."
       iconURL: "/assets/perplexity.svg"
       preset:
-        endpoint: "perplexity"
+        endpoint: "Perplexity"
         model: "sonar"
     - name: "Marginal Agent"
       label: "Marginal Agent - (demo)"
