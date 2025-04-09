@@ -4,6 +4,7 @@ cache: true
 
 interface:
   customWelcome: "Velkommen til MChat"
+  modelSelect: true
 
 registration:
   socialLogins:
@@ -123,14 +124,21 @@ endpoints:
         - "frequency_penalty"
       modelDisplayLabel: "Perplexity"
 
-    
+
 
 modelSpecs:
   addedEndpoints:
     - openAI
     - google
     - perplexity
-    - cohere
+    - agents
+    - assistants
+    - azureOpenAI
+    - chatGPTBrowser
+    - gptPlugins
+    - anthropic
+    - MarginalAgent
+    - demon8n
   enforce: false
   prioritize: false
   list:
