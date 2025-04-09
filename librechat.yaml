@@ -173,7 +173,7 @@ modelSpecs:
         model: "claude-3-7-sonnet-20250219"
 
     - name: "sonar"
-      label: "Perplexity Sonar"
+      label: "Perplexity - Sonar"
       description: "Perplexity's Sonar model for real-time, web-wide research and Q&A capabilities."
       iconURL: "/assets/perplexity.svg"
       preset:
