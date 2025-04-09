@@ -124,13 +124,13 @@ endpoints:
       modelDisplayLabel: "Perplexity"
 
 modelSpecs:
-  enforce: true
+  enforce: false
   prioritize: true
   list:
     - name: "Custom Agent"
       label: "Custom Agent"
       description: "This is a description of the custom agent."
-      iconURL: "path/to/icon.png"
+      iconURL: "/assets/logo.svg"
       default: true
       preset:
         endpoint: "agents"
