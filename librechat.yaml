@@ -126,7 +126,7 @@ modelSpecs:
     - anthropic
     - MarginalAgent
   enforce: false
-  prioritize: false
+  prioritize: true
   list:
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
@@ -158,7 +158,7 @@ modelSpecs:
       description: "Perplexity's Sonar model for real-time, web-wide research and Q&A capabilities."
       iconURL: "/assets/perplexity.svg"
       preset:
-        endpoint: "Perplexity"
+        endpoint: "perplexity"
         model: "sonar"
     - name: "Marginal Agent"
       label: "Marginal Agent - (demo)"
