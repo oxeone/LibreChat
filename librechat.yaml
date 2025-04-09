@@ -122,3 +122,10 @@ endpoints:
         - "stop"
         - "frequency_penalty"
       modelDisplayLabel: "Perplexity"
+
+modelSpecs:
+  list:
+    - model: "agent_Spc26zbmaj2FcADOrk1GY"  # Replace with the actual Agent ID
+      label: "Marginal - Marketing"
+      description: "Agent with tools and plugins."
+      iconURL: "/assets/logo.svg"
