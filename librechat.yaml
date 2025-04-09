@@ -3,8 +3,10 @@ version: 1.2.1
 cache: true
 
 interface:
-  #customWelcome: "Velkommen til MChat"
+  customWelcome: "Velkommen til MChat"
   modelSelect: true
+  sidePanel: true
+  parameters: true
 
 registration:
   socialLogins:
@@ -138,7 +140,6 @@ modelSpecs:
     - gptPlugins
     - anthropic
     - MarginalAgent
-    - demon8n
   enforce: false
   prioritize: false
   list:
