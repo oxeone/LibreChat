@@ -126,6 +126,11 @@ endpoints:
     
 
 modelSpecs:
+  addedEndpoints:
+    - openAI
+    - google
+    - perplexity
+    - cohere
   enforce: false
   prioritize: false
   list:
