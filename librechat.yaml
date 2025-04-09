@@ -124,8 +124,14 @@ endpoints:
       modelDisplayLabel: "Perplexity"
 
 modelSpecs:
+  enforce: true
+  prioritize: true
   list:
-    - model: "agent_Spc26zbmaj2FcADOrk1GY"  # Replace with the actual Agent ID
-      label: "Marginal - Marketing"
-      description: "Agent with tools and plugins."
-      iconURL: "/assets/logo.svg"
+    - name: "Custom Agent"
+      label: "Custom Agent"
+      description: "This is a description of the custom agent."
+      iconURL: "path/to/icon.png"
+      default: true
+      preset:
+        endpoint: "agents"
+        agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
