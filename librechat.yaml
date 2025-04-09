@@ -7,6 +7,12 @@ interface:
   modelSelect: true
   sidePanel: true
   parameters: true
+  presets: true
+  prompts: true
+  bookmarks: true
+  multiConvo: true
+  agents: true
+  runCode: true
 
 registration:
   socialLogins:
@@ -126,8 +132,6 @@ endpoints:
         - "frequency_penalty"
       modelDisplayLabel: "Perplexity"
 
-
-
 modelSpecs:
   addedEndpoints:
     - openAI
@@ -143,7 +147,6 @@ modelSpecs:
   enforce: false
   prioritize: false
   list:
-
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
       description: "OpenAI's GPT-4 Omni model capable of processing text, audio, and images."
@@ -155,7 +158,6 @@ modelSpecs:
         greeting: |
           This assistant creates meeting notes based on transcripts of Teams recordings.
           To start, simply paste the transcript into the chat box.
-
     - name: "gemini-2.0-flash-001"
       label: "Google Gemini - 2.0 Flash"
       description: "Google's Gemini 2.0 Flash model for advanced AI tasks."
@@ -163,7 +165,6 @@ modelSpecs:
       preset:
         endpoint: "google"
         model: "gemini-2.0-flash-001"
-
     - name: "claude-3-7-sonnet-20250219"
       label: "Claude 3.7 Sonnet"
       description: "Anthropic's Claude 3.7 Sonnet model excels in complex problem-solving with advanced reasoning capabilities."
@@ -171,7 +172,6 @@ modelSpecs:
       preset:
         endpoint: "anthropic"
         model: "claude-3-7-sonnet-20250219"
-
     - name: "sonar"
       label: "Perplexity - Sonar"
       description: "Perplexity's Sonar model for real-time, web-wide research and Q&A capabilities."
@@ -179,7 +179,6 @@ modelSpecs:
       preset:
         endpoint: "perplexity"
         model: "sonar"
-
     - name: "Marginal Agent"
       label: "Marginal Agent - (demo)"
       description: "Analytics, Drive, Sheets, CVR, Trustpilot, Get website, Get Google Map ... "
@@ -190,7 +189,4 @@ modelSpecs:
         greeting: "Denne agent har adgnag til en lang række værktøjer i Marginal.
           - Drive
           - Analytics
-          - Tools"
-
-
-        
+          - Tools"        
