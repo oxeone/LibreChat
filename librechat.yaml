@@ -127,7 +127,7 @@ endpoints:
 
 modelSpecs:
   enforce: false
-  prioritize: true
+  prioritize: false
   list:
     - name: "Custom Agent"
       label: "Custom Agent"
