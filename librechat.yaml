@@ -142,13 +142,6 @@ modelSpecs:
   enforce: false
   prioritize: false
   list:
-    - name: "Custom Agent"
-      label: "Custom Agent"
-      description: "This is a description of the custom agent."
-      iconURL: "/assets/logo.svg"
-      preset:
-        endpoint: "agents"
-        agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
 
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
@@ -159,14 +152,6 @@ modelSpecs:
         endpoint: "openAI"
         model: "gpt-4o"
 
-    - name: "o1"
-      label: "OpenAI GPT-o1"
-      description: "OpenAI's o1 model designed for complex reasoning tasks."
-      iconURL: "/assets/openai.svg"
-      preset:
-        endpoint: "openAI"
-        model: "o1"
-
     - name: "gemini-2.0-flash-001"
       label: "Google Gemini - 2.0 Flash"
       description: "Google's Gemini 2.0 Flash model for advanced AI tasks."
@@ -175,13 +160,21 @@ modelSpecs:
         endpoint: "google"
         model: "gemini-2.0-flash-001"
 
-    - name: "gemini-2.0-pro-exp-02-05"
-      label: "Google Gemini - 2.0 Pro"
-      description: "Google's Gemini 2.0 Pro model for advanced AI tasks."
-      iconURL: "/assets/google.svg"
+    - name: "claude-3-7-sonnet-20250219"
+      label: "Claude 3.7 Sonnet"
+      description: "Anthropic's Claude 3.7 Sonnet model excels in complex problem-solving with advanced reasoning capabilities."
+      iconURL: "/assets/claude.svg"
       preset:
-        endpoint: "google"
-        model: "gemini-2.0-pro-exp-02-05"
+        endpoint: "anthropic"
+        model: "claude-3-7-sonnet-20250219"
+
+    - name: "Marginal Agent"
+      label: "Marginal Agent - (demo)"
+      description: "Analytics, Drive, Sheets, CVR, Trustpilot, Get website, Get Google Map ... "
+      iconURL: "/assets/logo.svg"
+      preset:
+        endpoint: "agents"
+        agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
 
 
         
