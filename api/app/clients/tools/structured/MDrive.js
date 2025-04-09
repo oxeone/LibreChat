@@ -16,12 +16,11 @@ class MDrive extends Tool {
     this.description = 'A tool for performing various operations in Google Drive and Google Sheets, such as managing files and manipulating spreadsheet data.';
     this.description_for_model = 'This tool enables me to perform a range of operations in Google Drive and Google Sheets. Users can manage files by copying, creating, moving, sharing, downloading, and updating them. Additionally, users can interact with Google Sheets by creating spreadsheets, adding sheets, appending or updating rows, and retrieving rows. Input the desired operation and relevant parameters as fields in the input JSON. The tool will execute the specified operation and return the result, facilitating efficient management and manipulation of files and spreadsheet data.';
     this.schema = z.object({
-      operation: z
+      query: z
         .string()
-        .describe('The operation to perform, e.g., "copyFile", "createSpreadsheet", "appendRow".'),
-      parameters: z
-        .object()
-        .describe('The parameters required for the specified operation, such as file ID, destination, data to append, etc.'),
+        .describe(
+          ' The operation to perform, e.g., "copyFile", "createSpreadsheet", "appendRow".',
+        ),
     });
   }
 
