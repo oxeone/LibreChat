@@ -135,3 +135,19 @@ modelSpecs:
       preset:
         endpoint: "agents"
         agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
+        
+    - name: "gemini-pro"
+      label: "Google Gemini Pro"
+      description: "Google's Gemini Pro model for advanced AI tasks."
+      iconURL: "/assets/google.svg"
+      preset:
+        endpoint: "google"
+        model: "gemini-pro"
+
+    - name: "gemini-pro-vision"
+      label: "Google Gemini Pro Vision"
+      description: "Google's Gemini Pro Vision model for image analysis."
+      iconURL: "/assets/google.svg"
+      preset:
+        endpoint: "google"
+        model: "gemini-pro-vision"
