@@ -151,18 +151,21 @@ modelSpecs:
         endpoint: "agents"
         agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
 
-    - name: "gemini-pro"
-      label: "Google Gemini Pro"
-      description: "Google's Gemini Pro model for advanced AI tasks."
+    - name: "gemini-2.0-flash-001"
+      label: "Google Gemini - 2.0 Flash"
+      description: "Google's Gemini 2.0 Flash model for advanced AI tasks."
       iconURL: "/assets/google.svg"
       preset:
         endpoint: "google"
-        model: "gemini-pro"
+        model: "gemini-2.0-flash-001"
 
-    - name: "gemini-pro-vision"
-      label: "Google Gemini Pro Vision"
-      description: "Google's Gemini Pro Vision model for image analysis."
+    - name: "gemini-2.0-pro-exp-02-05"
+      label: "Google Gemini - 2.0 Pro"
+      description: "Google's Gemini 2.0 Pro model for advanced AI tasks."
       iconURL: "/assets/google.svg"
       preset:
         endpoint: "google"
-        model: "gemini-pro-vision"
+        model: "gemini-2.0-pro-exp-02-05"
+
+
+        
