@@ -161,7 +161,7 @@ const loadTools = async ({
     cvr_search: CVRSearch,
     m_analytics: MAnalytics,
     m_drive: MDrive,
-    m_activecampaign,
+    m_activecampaign: MActiveCampaign,
   };
 
   const customConstructors = {

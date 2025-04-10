@@ -2,7 +2,7 @@
   {
     "name": "Marginal - ActiveCampaign",
     "pluginKey": "m_activecampaign",
-    "description": "Søg, opdater og opret deals, accounts og contacts.",
+    "description": "Søg, opdater og opret deals, accounts og contacts i ActiveCampaign",
     "icon": "/assets/logo.svg",
     "isAuthRequired": "false",
     "authConfig": []
