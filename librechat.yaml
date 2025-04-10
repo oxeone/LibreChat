@@ -162,7 +162,7 @@ modelSpecs:
         model: "sonar"
     - name: "Marginal Agent"
       label: "Marginal Agent - (demo)"
-      description: "Analytics, Drive, Sheets, CVR, Trustpilot, Get website, Get Google Map ... "
+      description: "Analytics, ActiveCampaign, Drive, Sheets, CVR, Trustpilot, Get website, Get Google Map ... "
       iconURL: "/assets/logo.svg"
       preset:
         endpoint: "agents"

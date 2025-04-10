@@ -21,6 +21,7 @@ const {
   CVRSearch,
   MAnalytics,
   MDrive,
+  MActiveCampaign,
 } = require('../');
 const { primeFiles: primeCodeFiles } = require('~/server/services/Files/Code/process');
 const { createFileSearchTool, primeFiles: primeSearchFiles } = require('./fileSearch');
@@ -160,6 +161,7 @@ const loadTools = async ({
     cvr_search: CVRSearch,
     m_analytics: MAnalytics,
     m_drive: MDrive,
+    m_activecampaign,
   };
 
   const customConstructors = {

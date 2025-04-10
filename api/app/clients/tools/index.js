@@ -14,6 +14,7 @@ const TavilySearchResults = require('./structured/TavilySearchResults');
 const CVRSearch = require('./structured/CVRSearch');
 const MAnalytics = require('./structured/MAnalytics');
 const MDrive = require('./structured/MDrive');
+const MActiveCampaign = require('./structured/MActiveCampaign');
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};
@@ -46,4 +47,5 @@ module.exports = {
   CVRSearch,
   MAnalytics,
   MDrive,
+  MActiveCampaign,
 };
