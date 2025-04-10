@@ -1,5 +1,13 @@
 [
   {
+    "name": "Marginal - ActiveCampaign",
+    "pluginKey": "m_activecampaign",
+    "description": "Søg, opdater og opret deals, accounts og contacts.",
+    "icon": "/assets/logo.svg",
+    "isAuthRequired": "false",
+    "authConfig": []
+  },
+  {
     "name": "Marginal - Drive",
     "pluginKey": "m_drive",
     "description": "Google Drive actions agent.",
