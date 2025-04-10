@@ -3,9 +3,9 @@ const { Tool } = require('@langchain/core/tools');
 const { logger } = require('~/config');
 
 /**
- * Værktøj til MAnalytics API.
+ * Værktøj til MActiveCampaign API.
  */
-class MAnalytics extends Tool {
+class MActiveCampaign extends Tool {
   static lc_name() {
     return 'MActiveCampaign';
   }
