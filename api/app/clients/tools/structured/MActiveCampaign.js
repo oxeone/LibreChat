@@ -13,12 +13,12 @@ class MAnalytics extends Tool {
   constructor(fields) {
     super(fields);
     this.name = 'm_activecampaign';
-    this.description = 'Et værktøj til at søge i Google Analytics-rapporter baseret på klientnavn eller URL.';
-    this.description_for_model = 'Dette værktøj gør det muligt for brugere at søge og hente data fra Google Analytics-rapporter. Ved at angive parametre som klientnavn eller URL kan brugere få adgang til detaljerede analytics-data fra deres Google Analytics-konti. Indtast det ønskede klientnavn eller URL som "query"-feltet i input JSON. Værktøjet returnerer relevante analytics-data for den specificerede klient, hvilket letter en omfattende analyse af webstedets eller applikationens ydeevne.';
+    this.description = 'Et værktøj til at administrere deals, accounts og contacts i ActiveCampaign.';
+    this.description_for_model = 'Dette værktøj gør det muligt for brugere at søge, opdatere og oprette deals, accounts og contacts i ActiveCampaign. Ved at angive en søgeforespørgsel kan brugere interagere med deres ActiveCampaign-data for effektiv styring af salgs- og marketingaktiviteter. Indtast den ønskede søgeforespørgsel som "query"-feltet i input JSON. Værktøjet returnerer relevante data fra ActiveCampaign baseret på den specificerede forespørgsel.';
     this.schema = z.object({
       query: z
         .string()
-        .describe('Klientnavn eller URL for at hente Google Analytics-data.'),
+        .describe('Søgeforespørgsel for at hente data fra ActiveCampaign.'),
     });
   }
 
