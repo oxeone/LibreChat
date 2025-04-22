@@ -24,7 +24,7 @@ class MActiveCampaign extends Tool {
 
   // eslint-disable-next-line no-unused-vars
   async _call({ query }, _runManager) {
-    const apiUrl = 'https://margial.app.n8n.cloud/webhook-test/094db746-0b30-437e-be9f-02600c860586';
+    const apiUrl = 'https://margial.app.n8n.cloud/webhook/094db746-0b30-437e-be9f-02600c860586';
 
     try {
       const response = await fetch(apiUrl, {

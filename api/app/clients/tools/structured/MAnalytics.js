@@ -24,7 +24,7 @@ class MAnalytics extends Tool {
 
   // eslint-disable-next-line no-unused-vars
   async _call({ query }, _runManager) {
-    const apiUrl = 'https://margial.app.n8n.cloud/webhook-test/e9df69a4-1e32-47ee-9fcc-35b479b34ba2';
+    const apiUrl = 'https://margial.app.n8n.cloud/webhook/e9df69a4-1e32-47ee-9fcc-35b479b34ba2';
 
     try {
       const response = await fetch(apiUrl, {
