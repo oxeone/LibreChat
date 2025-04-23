@@ -18,7 +18,7 @@ class MActiveCampaign extends Tool {
     this.schema = z.object({
       query: z
         .string()
-        .describe('Søgeforespørgsel for at hente data fra ActiveCampaign.'),
+        .describe('kunde, lead navn, eller kontakt person information for at hente data fra ActiveCampaign.'),
     });
   }
 
