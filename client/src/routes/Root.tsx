@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import type { ContextType } from '~/common';
 import {
+  useAuthContext,
+  useAssistantsMap,
+  useAgentsMap,
+  useFileMap,
+  useSearchEnabled,
+} from '~/hooks';
+import {
   AgentsMapContext,
   AssistantsMapContext,
   FileMapContext,
-  SearchContext,
   SetConvoProvider,
 } from '~/Providers';
-import { useAuthContext, useAssistantsMap, useAgentsMap, useFileMap, useSearch } from '~/hooks';
 import TermsAndConditionsModal from '~/components/ui/TermsAndConditionsModal';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { Nav, MobileNav } from '~/components/Nav';
@@ -26,12 +31,13 @@ export default function Root() {
   const assistantsMap = useAssistantsMap({ isAuthenticated });
   const agentsMap = useAgentsMap({ isAuthenticated });
   const fileMap = useFileMap({ isAuthenticated });
-  const search = useSearch({ isAuthenticated });
 
   const { data: config } = useGetStartupConfig();
   const { data: termsData } = useUserTermsQuery({
     enabled: isAuthenticated && config?.interface?.termsOfService?.modalAcceptance === true,
   });
+
+  useSearchEnabled(isAuthenticated);
 
   useEffect(() => {
     if (termsData) {
@@ -43,7 +49,6 @@ export default function Root() {
     setShowTerms(false);
   };
 
-  // Pass the desired redirect parameter to logout
   const handleDeclineTerms = () => {
     setShowTerms(false);
     logout('/login?redirect=false');
@@ -61,9 +66,6 @@ export default function Root() {
             <AgentsMapContext.Provider value={agentsMap}>
               <Banner onHeightChange={setBannerHeight} />
               <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
-                <header className="w-full bg-blue-500 text-white p-4" style={{ height: '96px' }}>
-                  <h1 className="text-center text-xl">MCHAT</h1>
-                </header>
                 <div className="relative z-0 flex h-full w-full overflow-hidden">
                   <Nav navVisible={navVisible} setNavVisible={setNavVisible} />
                   <div className="relative flex h-full max-w-full flex-1 flex-col overflow-hidden">
