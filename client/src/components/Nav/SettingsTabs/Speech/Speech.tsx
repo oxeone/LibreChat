@@ -20,14 +20,12 @@ import {
   EngineSTTDropdown,
   DecibelSelector,
 } from './STT';
-import { useOnClickOutside, useMediaQuery, useLocalize } from '~/hooks';
 import ConversationModeSwitch from './ConversationModeSwitch';
+import { useOnClickOutside, useMediaQuery } from '~/hooks';
 import { cn, logger } from '~/utils';
 import store from '~/store';
 
 function Speech() {
-  const localize = useLocalize();
-
   const [confirmClear, setConfirmClear] = useState(false);
   const { data } = useGetCustomConfigSpeechQuery();
   const isSmallScreen = useMediaQuery('(max-width: 767px)');
@@ -136,14 +134,6 @@ function Speech() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  // Reset engineTTS if it is set to a removed/invalid value (e.g., 'edge')
-  useEffect(() => {
-    const validEngines = ['browser', 'external'];
-    if (!validEngines.includes(engineTTS)) {
-      setEngineTTS('browser');
-    }
-  }, [engineTTS, setEngineTTS]);
-
   logger.log({ sttExternal, ttsExternal });
 
   const contentRef = useRef(null);
@@ -168,7 +158,7 @@ function Speech() {
             style={{ userSelect: 'none' }}
           >
             <Lightbulb />
-            {localize('com_ui_simple')}
+            Simple
           </Tabs.Trigger>
           <Tabs.Trigger
             onClick={() => setAdvancedMode(true)}
@@ -181,7 +171,7 @@ function Speech() {
             style={{ userSelect: 'none' }}
           >
             <Cog />
-            {localize('com_ui_advanced')}
+            Advanced
           </Tabs.Trigger>
         </Tabs.List>
       </div>

@@ -1,5 +1,4 @@
 import React, {
-  memo,
   useState,
   useRef,
   useEffect,
@@ -10,18 +9,14 @@ import React, {
 } from 'react';
 import { useRecoilValue, useRecoilCallback } from 'recoil';
 import type { LucideIcon } from 'lucide-react';
-import CodeInterpreter from './CodeInterpreter';
-import type { BadgeItem } from '~/common';
 import { useChatBadges } from '~/hooks';
 import { Badge } from '~/components/ui';
-import MCPSelect from './MCPSelect';
+import { BadgeItem } from '~/common';
 import store from '~/store';
 
 interface BadgeRowProps {
-  showEphemeralBadges?: boolean;
   onChange: (badges: Pick<BadgeItem, 'id'>[]) => void;
   onToggle?: (badgeId: string, currentActive: boolean) => void;
-  conversationId?: string | null;
   isInChat: boolean;
 }
 
@@ -38,8 +33,7 @@ interface BadgeWrapperProps {
 const BadgeWrapper = React.memo(
   forwardRef<HTMLDivElement, BadgeWrapperProps>(
     ({ badge, isEditing, isInChat, onToggle, onDelete, onMouseDown, badgeRefs }, ref) => {
-      const atomBadge = useRecoilValue(badge.atom);
-      const isActive = badge.atom ? atomBadge : false;
+      const isActive = badge.atom ? useRecoilValue(badge.atom) : false;
 
       return (
         <div
@@ -132,13 +126,7 @@ const dragReducer = (state: DragState, action: DragAction): DragState => {
   }
 };
 
-function BadgeRow({
-  showEphemeralBadges,
-  conversationId,
-  onChange,
-  onToggle,
-  isInChat,
-}: BadgeRowProps) {
+export function BadgeRow({ onChange, onToggle, isInChat }: BadgeRowProps) {
   const [orderedBadges, setOrderedBadges] = useState<BadgeItem[]>([]);
   const [dragState, dispatch] = useReducer(dragReducer, {
     draggedBadge: null,
@@ -153,7 +141,7 @@ function BadgeRow({
   const animationFrame = useRef<number | null>(null);
   const containerRectRef = useRef<DOMRect | null>(null);
 
-  const allBadges = useChatBadges();
+  const allBadges = useChatBadges() || [];
   const isEditing = useRecoilValue(store.isEditingBadges);
 
   const badges = useMemo(
@@ -352,12 +340,6 @@ function BadgeRow({
           />
         </div>
       )}
-      {showEphemeralBadges === true && (
-        <>
-          <CodeInterpreter conversationId={conversationId} />
-          <MCPSelect conversationId={conversationId} />
-        </>
-      )}
       {ghostBadge && (
         <div
           className="ghost-badge h-full"
@@ -385,5 +367,3 @@ function BadgeRow({
     </div>
   );
 }
-
-export default memo(BadgeRow);

@@ -1,11 +1,11 @@
+const OpenAI = require('openai');
 const { OllamaClient } = require('./OllamaClient');
 const { HttpsProxyAgent } = require('https-proxy-agent');
-const { SplitStreamHandler, CustomOpenAIClient: OpenAI } = require('@librechat/agents');
+const { SplitStreamHandler, GraphEvents } = require('@librechat/agents');
 const {
   Constants,
   ImageDetail,
   ContentTypes,
-  parseTextParts,
   EModelEndpoint,
   resolveHeaders,
   KnownEndpoints,
@@ -31,18 +31,17 @@ const {
   createContextHandlers,
 } = require('./prompts');
 const { encodeAndFormat } = require('~/server/services/Files/images/encode');
-const { createFetch, createStreamEventHandlers } = require('./generators');
 const { addSpaceIfNeeded, isEnabled, sleep } = require('~/server/utils');
 const Tokenizer = require('~/server/services/Tokenizer');
 const { spendTokens } = require('~/models/spendTokens');
 const { handleOpenAIErrors } = require('./tools/util');
 const { createLLM, RunManager } = require('./llm');
+const { logger, sendEvent } = require('~/config');
 const ChatGPTClient = require('./ChatGPTClient');
 const { summaryBuffer } = require('./memory');
 const { runTitleChain } = require('./chains');
 const { tokenSplit } = require('./document');
 const BaseClient = require('./BaseClient');
-const { logger } = require('~/config');
 
 class OpenAIClient extends BaseClient {
   constructor(apiKey, options = {}) {
@@ -108,7 +107,7 @@ class OpenAIClient extends BaseClient {
       this.checkVisionRequest(this.options.attachments);
     }
 
-    const omniPattern = /\b(o\d)\b/i;
+    const omniPattern = /\b(o1|o3)\b/i;
     this.isOmni = omniPattern.test(this.modelOptions.model);
 
     const { OPENAI_FORCE_PROMPT } = process.env ?? {};
@@ -609,7 +608,7 @@ class OpenAIClient extends BaseClient {
         return result.trim();
       }
 
-      logger.debug('[OpenAIClient] sendCompletion: result', { ...result });
+      logger.debug('[OpenAIClient] sendCompletion: result', result);
 
       if (this.isChatCompletion) {
         reply = result.choices[0].message.content;
@@ -818,7 +817,7 @@ ${convo}
 
         const completionTokens = this.getTokenCount(title);
 
-        await this.recordTokenUsage({ promptTokens, completionTokens, context: 'title' });
+        this.recordTokenUsage({ promptTokens, completionTokens, context: 'title' });
       } catch (e) {
         logger.error(
           '[OpenAIClient] There was an issue generating the title with the completion method',
@@ -1122,8 +1121,15 @@ ${convo}
       if (msg.text != null && msg.text && msg.text.startsWith(':::thinking')) {
         msg.text = msg.text.replace(/:::thinking.*?:::/gs, '').trim();
       } else if (msg.content != null) {
-        msg.text = parseTextParts(msg.content, true);
-        delete msg.content;
+        /** @type {import('@librechat/agents').MessageContentComplex} */
+        const newContent = [];
+        for (let part of msg.content) {
+          if (part.think != null) {
+            continue;
+          }
+          newContent.push(part);
+        }
+        msg.content = newContent;
       }
 
       return msg;
@@ -1237,9 +1243,6 @@ ${convo}
         modelOptions.max_completion_tokens = modelOptions.max_tokens;
         delete modelOptions.max_tokens;
       }
-      if (this.isOmni === true && modelOptions.temperature != null) {
-        delete modelOptions.temperature;
-      }
 
       if (process.env.OPENAI_ORGANIZATION) {
         opts.organization = process.env.OPENAI_ORGANIZATION;
@@ -1248,10 +1251,7 @@ ${convo}
       let chatCompletion;
       /** @type {OpenAI} */
       const openai = new OpenAI({
-        fetch: createFetch({
-          directEndpoint: this.options.directEndpoint,
-          reverseProxyUrl: this.options.reverseProxyUrl,
-        }),
+        fetch: this.fetch,
         apiKey: this.apiKey,
         ...opts,
       });
@@ -1281,13 +1281,12 @@ ${convo}
       }
 
       if (this.options.addParams && typeof this.options.addParams === 'object') {
-        const addParams = { ...this.options.addParams };
         modelOptions = {
           ...modelOptions,
-          ...addParams,
+          ...this.options.addParams,
         };
         logger.debug('[OpenAIClient] chatCompletion: added params', {
-          addParams: addParams,
+          addParams: this.options.addParams,
           modelOptions,
         });
       }
@@ -1316,12 +1315,11 @@ ${convo}
       }
 
       if (this.options.dropParams && Array.isArray(this.options.dropParams)) {
-        const dropParams = [...this.options.dropParams];
-        dropParams.forEach((param) => {
+        this.options.dropParams.forEach((param) => {
           delete modelOptions[param];
         });
         logger.debug('[OpenAIClient] chatCompletion: dropped params', {
-          dropParams: dropParams,
+          dropParams: this.options.dropParams,
           modelOptions,
         });
       }
@@ -1363,12 +1361,15 @@ ${convo}
         delete modelOptions.reasoning_effort;
       }
 
-      const handlers = createStreamEventHandlers(this.options.res);
       this.streamHandler = new SplitStreamHandler({
         reasoningKey,
         accumulate: true,
         runId: this.responseMessageId,
-        handlers,
+        handlers: {
+          [GraphEvents.ON_RUN_STEP]: (event) => sendEvent(this.options.res, event),
+          [GraphEvents.ON_MESSAGE_DELTA]: (event) => sendEvent(this.options.res, event),
+          [GraphEvents.ON_REASONING_DELTA]: (event) => sendEvent(this.options.res, event),
+        },
       });
 
       intermediateReply = this.streamHandler.tokens;
@@ -1470,11 +1471,6 @@ ${convo}
           .catch((err) => {
             handleOpenAIErrors(err, errorCallback, 'create');
           });
-      }
-
-      if (openai.abortHandler && abortController.signal) {
-        abortController.signal.removeEventListener('abort', openai.abortHandler);
-        openai.abortHandler = undefined;
       }
 
       if (!chatCompletion && UnexpectedRoleError) {

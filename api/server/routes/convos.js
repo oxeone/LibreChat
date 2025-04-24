@@ -1,17 +1,16 @@
 const multer = require('multer');
 const express = require('express');
 const { CacheKeys, EModelEndpoint } = require('librechat-data-provider');
-const { getConvosByCursor, deleteConvos, getConvo, saveConvo } = require('~/models/Conversation');
+const { getConvosByPage, deleteConvos, getConvo, saveConvo } = require('~/models/Conversation');
 const { forkConversation, duplicateConversation } = require('~/server/utils/import/fork');
 const { storage, importFileFilter } = require('~/server/routes/files/multer');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const { importConversations } = require('~/server/utils/import');
 const { createImportLimiters } = require('~/server/middleware');
 const { deleteToolCalls } = require('~/models/ToolCall');
-const { isEnabled, sleep } = require('~/server/utils');
 const getLogStores = require('~/cache/getLogStores');
+const { sleep } = require('~/server/utils');
 const { logger } = require('~/config');
-
 const assistantClients = {
   [EModelEndpoint.azureAssistants]: require('~/server/services/Endpoints/azureAssistants'),
   [EModelEndpoint.assistants]: require('~/server/services/Endpoints/assistants'),
@@ -21,30 +20,28 @@ const router = express.Router();
 router.use(requireJwtAuth);
 
 router.get('/', async (req, res) => {
-  const limit = parseInt(req.query.limit, 10) || 25;
-  const cursor = req.query.cursor;
-  const isArchived = isEnabled(req.query.isArchived);
-  const search = req.query.search ? decodeURIComponent(req.query.search) : undefined;
-  const order = req.query.order || 'desc';
+  let pageNumber = req.query.pageNumber || 1;
+  pageNumber = parseInt(pageNumber, 10);
 
+  if (isNaN(pageNumber) || pageNumber < 1) {
+    return res.status(400).json({ error: 'Invalid page number' });
+  }
+
+  let pageSize = req.query.pageSize || 25;
+  pageSize = parseInt(pageSize, 10);
+
+  if (isNaN(pageSize) || pageSize < 1) {
+    return res.status(400).json({ error: 'Invalid page size' });
+  }
+  const isArchived = req.query.isArchived === 'true';
   let tags;
   if (req.query.tags) {
     tags = Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags];
+  } else {
+    tags = undefined;
   }
 
-  try {
-    const result = await getConvosByCursor(req.user.id, {
-      cursor,
-      limit,
-      isArchived,
-      tags,
-      search,
-      order,
-    });
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching conversations' });
-  }
+  res.status(200).send(await getConvosByPage(req.user.id, pageNumber, pageSize, isArchived, tags));
 });
 
 router.get('/:conversationId', async (req, res) => {
@@ -79,28 +76,22 @@ router.post('/gen_title', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
+router.post('/clear', async (req, res) => {
   let filter = {};
   const { conversationId, source, thread_id, endpoint } = req.body.arg;
-
-  // Prevent deletion of all conversations
-  if (!conversationId && !source && !thread_id && !endpoint) {
-    return res.status(400).json({
-      error: 'no parameters provided',
-    });
-  }
-
   if (conversationId) {
     filter = { conversationId };
-  } else if (source === 'button') {
+  }
+
+  if (source === 'button' && !conversationId) {
     return res.status(200).send('No conversationId provided');
   }
 
   if (
-    typeof endpoint !== 'undefined' &&
+    typeof endpoint != 'undefined' &&
     Object.prototype.propertyIsEnumerable.call(assistantClients, endpoint)
   ) {
-    /** @type {{ openai: OpenAI }} */
+    /** @type {{ openai: OpenAI}} */
     const { openai } = await assistantClients[endpoint].initializeClient({ req, res });
     try {
       const response = await openai.beta.threads.del(thread_id);
@@ -110,20 +101,12 @@ router.delete('/', async (req, res) => {
     }
   }
 
+  // for debugging deletion source
+  // logger.debug('source:', source);
+
   try {
     const dbResponse = await deleteConvos(req.user.id, filter);
     await deleteToolCalls(req.user.id, filter.conversationId);
-    res.status(201).json(dbResponse);
-  } catch (error) {
-    logger.error('Error clearing conversations', error);
-    res.status(500).send('Error clearing conversations');
-  }
-});
-
-router.delete('/all', async (req, res) => {
-  try {
-    const dbResponse = await deleteConvos(req.user.id, {});
-    await deleteToolCalls(req.user.id);
     res.status(201).json(dbResponse);
   } catch (error) {
     logger.error('Error clearing conversations', error);

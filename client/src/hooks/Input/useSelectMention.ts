@@ -9,7 +9,7 @@ import type {
   TEndpointsConfig,
 } from 'librechat-data-provider';
 import type { MentionOption, ConvoGenerator } from '~/common';
-import { getConvoSwitchLogic, getModelSpecIconURL, removeUnavailableTools, logger } from '~/utils';
+import { getConvoSwitchLogic, getModelSpecIconURL, removeUnavailableTools } from '~/utils';
 import { useChatContext } from '~/Providers';
 import { useDefaultConvo } from '~/hooks';
 import store from '~/store';
@@ -86,7 +86,6 @@ export default function useSelectMention({
         });
 
         /* We don't reset the latest message, only when changing settings mid-converstion */
-        logger.info('conversation', 'Switching conversation to new spec (modular)', conversation);
         newConversation({
           template: currentConvo,
           preset,
@@ -96,7 +95,6 @@ export default function useSelectMention({
         return;
       }
 
-      logger.info('conversation', 'Switching conversation to new spec', conversation);
       newConversation({
         template: { ...(template as Partial<TConversation>) },
         preset,
@@ -174,25 +172,13 @@ export default function useSelectMention({
         });
 
         /* We don't reset the latest message, only when changing settings mid-converstion */
-        logger.info(
-          'conversation',
-          'Switching conversation to new endpoint/model (modular)',
-          currentConvo,
-        );
-        newConversation({
-          template: currentConvo,
-          preset: currentConvo,
-          keepLatestMessage: true,
-          keepAddedConvos: true,
-        });
+        newConversation({ template: currentConvo, preset: currentConvo, keepLatestMessage: true });
         return;
       }
 
-      logger.info('conversation', 'Switching conversation to new endpoint/model', template);
       newConversation({
         template: { ...(template as Partial<TConversation>) },
         preset: { ...kwargs, spec: null, iconURL: null, modelLabel: null, endpoint: newEndpoint },
-        keepAddedConvos: isNewModular,
       });
     },
     [conversation, getDefaultConversation, modularChat, newConversation, endpointsConfig],
@@ -238,7 +224,6 @@ export default function useSelectMention({
         });
 
         /* We don't reset the latest message, only when changing settings mid-converstion */
-        logger.info('conversation', 'Switching conversation to new preset (modular)', currentConvo);
         newConversation({
           template: currentConvo,
           preset: newPreset,
@@ -248,8 +233,7 @@ export default function useSelectMention({
         return;
       }
 
-      logger.info('conversation', 'Switching conversation to new preset', template);
-      newConversation({ preset: newPreset, keepAddedConvos: isModular });
+      newConversation({ preset: newPreset, keepAddedConvos: true });
     },
     [
       modularChat,

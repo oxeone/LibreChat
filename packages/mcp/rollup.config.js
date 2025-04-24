@@ -1,11 +1,11 @@
 // rollup.config.js
-import { readFileSync } from 'fs';
-import terser from '@rollup/plugin-terser';
-import replace from '@rollup/plugin-replace';
-import commonjs from '@rollup/plugin-commonjs';
+import typescript from 'rollup-plugin-typescript2';
 import resolve from '@rollup/plugin-node-resolve';
-import typescript from '@rollup/plugin-typescript';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import commonjs from '@rollup/plugin-commonjs';
+import replace from '@rollup/plugin-replace';
+import terser from '@rollup/plugin-terser';
+import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
@@ -24,18 +24,16 @@ const plugins = [
   }),
   typescript({
     tsconfig: './tsconfig.json',
-    outDir: './dist',
-    sourceMap: true,
-    inlineSourceMap: true,
+    useTsconfigDeclarationDir: true,
   }),
   terser(),
 ];
 
-const cjsBuild = {
+const esmBuild = {
   input: 'src/index.ts',
   output: {
-    file: pkg.main,
-    format: 'cjs',
+    file: pkg.module,
+    format: 'esm',
     sourcemap: true,
     exports: 'named',
   },
@@ -44,4 +42,4 @@ const cjsBuild = {
   plugins,
 };
 
-export default cjsBuild;
+export default esmBuild;

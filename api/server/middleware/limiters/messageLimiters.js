@@ -1,8 +1,9 @@
+const Keyv = require('keyv');
 const rateLimit = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
 const denyRequest = require('~/server/middleware/denyRequest');
-const ioredisClient = require('~/cache/ioredisClient');
 const { isEnabled } = require('~/server/utils');
+const keyvRedis = require('~/cache/keyvRedis');
 const { logViolation } = require('~/cache');
 const { logger } = require('~/config');
 
@@ -62,9 +63,11 @@ const userLimiterOptions = {
   },
 };
 
-if (isEnabled(process.env.USE_REDIS) && ioredisClient) {
+if (isEnabled(process.env.USE_REDIS)) {
   logger.debug('Using Redis for message rate limiters.');
-  const sendCommand = (...args) => ioredisClient.call(...args);
+  const keyv = new Keyv({ store: keyvRedis });
+  const client = keyv.opts.store.redis;
+  const sendCommand = (...args) => client.call(...args);
   const ipStore = new RedisStore({
     sendCommand,
     prefix: 'message_ip_limiter:',

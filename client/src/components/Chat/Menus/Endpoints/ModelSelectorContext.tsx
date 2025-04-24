@@ -44,20 +44,24 @@ export function useModelSelectorContext() {
 
 interface ModelSelectorProviderProps {
   children: React.ReactNode;
+  modelSpecs: t.TModelSpec[];
   startupConfig: t.TStartupConfig | undefined;
 }
 
-export function ModelSelectorProvider({ children, startupConfig }: ModelSelectorProviderProps) {
+export function ModelSelectorProvider({
+  children,
+  modelSpecs,
+  startupConfig,
+}: ModelSelectorProviderProps) {
   const agentsMap = useAgentsMapContext();
   const assistantsMap = useAssistantsMapContext();
   const { data: endpointsConfig } = useGetEndpointsQuery();
   const { conversation, newConversation } = useChatContext();
-  const modelSpecs = useMemo(() => startupConfig?.modelSpecs?.list ?? [], [startupConfig]);
   const { mappedEndpoints, endpointRequiresUserKey } = useEndpoints({
     agentsMap,
     assistantsMap,
-    startupConfig,
     endpointsConfig,
+    startupConfig,
   });
   const { onSelectEndpoint, onSelectSpec } = useSelectMention({
     // presets,
@@ -142,7 +146,6 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
     if (isAgentsEndpoint(endpoint.value)) {
       onSelectEndpoint?.(endpoint.value, {
         agent_id: model,
-        model: agentsMap?.[model]?.model ?? '',
       });
     } else if (isAssistantsEndpoint(endpoint.value)) {
       onSelectEndpoint?.(endpoint.value, {
@@ -154,7 +157,7 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
     }
     setSelectedValues({
       endpoint: endpoint.value,
-      model,
+      model: model,
       modelSpec: '',
     });
   };

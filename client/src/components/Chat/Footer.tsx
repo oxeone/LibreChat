@@ -54,6 +54,7 @@ export default function Footer({ className }: { className?: string }) {
     <React.Fragment key={`main-content-part-${index}`}>
       <ReactMarkdown
         components={{
+
           a: ({ node: _n, href, children, ...otherProps }) => {
             return (
               <a
@@ -84,7 +85,7 @@ export default function Footer({ className }: { className?: string }) {
     <div
       className={
         className ??
-        'relative hidden items-center justify-center gap-2 px-2 py-2 text-center text-xs text-text-primary sm:flex md:px-[60px]'
+        'hide relative flex items-center justify-center gap-2 px-2 py-2 text-center text-xs text-text-primary md:px-[60px]'
       }
       role="contentinfo"
     >

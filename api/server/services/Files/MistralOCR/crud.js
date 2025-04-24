@@ -69,20 +69,16 @@ async function getSignedUrl({
 /**
  * @param {Object} params
  * @param {string} params.apiKey
- * @param {string} params.url - The document or image URL
- * @param {string} [params.documentType='document_url'] - 'document_url' or 'image_url'
- * @param {string} [params.model]
+ * @param {string} params.documentUrl
  * @param {string} [params.baseURL]
  * @returns {Promise<OCRResult>}
  */
 async function performOCR({
   apiKey,
-  url,
-  documentType = 'document_url',
+  documentUrl,
   model = 'mistral-ocr-latest',
   baseURL = 'https://api.mistral.ai/v1',
 }) {
-  const documentKey = documentType === 'image_url' ? 'image_url' : 'document_url';
   return axios
     .post(
       `${baseURL}/ocr`,
@@ -90,8 +86,8 @@ async function performOCR({
         model,
         include_image_base64: false,
         document: {
-          type: documentType,
-          [documentKey]: url,
+          type: 'document_url',
+          document_url: documentUrl,
         },
       },
       {
@@ -113,19 +109,6 @@ function extractVariableName(str) {
   return match ? match[1] : null;
 }
 
-/**
- * Uploads a file to the Mistral OCR API and processes the OCR result.
- *
- * @param {Object} params - The params object.
- * @param {ServerRequest} params.req - The request object from Express. It should have a `user` property with an `id`
- *                       representing the user
- * @param {Express.Multer.File} params.file - The file object, which is part of the request. The file object should
- *                                     have a `mimetype` property that tells us the file type
- * @param {string} params.file_id - The file ID.
- * @param {string} [params.entity_id] - The entity ID, not used here but passed for consistency.
- * @returns {Promise<{ filepath: string, bytes: number }>} - The result object containing the processed `text` and `images` (not currently used),
- *                       along with the `filename` and `bytes` properties.
- */
 const uploadMistralOCR = async ({ req, file, file_id, entity_id }) => {
   try {
     /** @type {TCustomConfig['ocr']} */
@@ -177,18 +160,11 @@ const uploadMistralOCR = async ({ req, file, file_id, entity_id }) => {
       fileId: mistralFile.id,
     });
 
-    const mimetype = (file.mimetype || '').toLowerCase();
-    const originalname = file.originalname || '';
-    const isImage =
-      mimetype.startsWith('image') || /\.(png|jpe?g|gif|bmp|webp|tiff?)$/i.test(originalname);
-    const documentType = isImage ? 'image_url' : 'document_url';
-
     const ocrResult = await performOCR({
       apiKey,
       baseURL,
       model,
-      url: signedUrlResponse.url,
-      documentType,
+      documentUrl: signedUrlResponse.url,
     });
 
     let aggregatedText = '';

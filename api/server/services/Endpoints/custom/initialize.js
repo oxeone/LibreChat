@@ -9,11 +9,10 @@ const { Providers } = require('@librechat/agents');
 const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
 const { getLLMConfig } = require('~/server/services/Endpoints/openAI/llm');
 const { getCustomEndpointConfig } = require('~/server/services/Config');
-const { createHandleLLMNewToken } = require('~/app/clients/generators');
 const { fetchModels } = require('~/server/services/ModelService');
-const OpenAIClient = require('~/app/clients/OpenAIClient');
-const { isUserProvided } = require('~/server/utils');
+const { isUserProvided, sleep } = require('~/server/utils');
 const getLogStores = require('~/cache/getLogStores');
+const { OpenAIClient } = require('~/app');
 
 const { PROXY } = process.env;
 
@@ -149,7 +148,9 @@ const initializeClient = async ({ req, res, endpointOption, optionsOnly, overrid
       }
       options.llmConfig.callbacks = [
         {
-          handleLLMNewToken: createHandleLLMNewToken(clientOptions.streamRate),
+          handleLLMNewToken: async () => {
+            await sleep(customOptions.streamRate);
+          },
         },
       ];
       return options;

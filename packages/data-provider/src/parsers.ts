@@ -13,6 +13,8 @@ import {
   // agentsSchema,
   compactAgentsSchema,
   compactGoogleSchema,
+  compactChatGPTSchema,
+  chatGPTBrowserSchema,
   compactPluginsSchema,
   compactAssistantSchema,
 } from './schemas';
@@ -24,19 +26,19 @@ type EndpointSchema =
   | typeof openAISchema
   | typeof googleSchema
   | typeof anthropicSchema
+  | typeof chatGPTBrowserSchema
   | typeof gptPluginsSchema
   | typeof assistantSchema
   | typeof compactAgentsSchema
   | typeof bedrockInputSchema;
 
-export type EndpointSchemaKey = Exclude<EModelEndpoint, EModelEndpoint.chatGPTBrowser>;
-
-const endpointSchemas: Record<EndpointSchemaKey, EndpointSchema> = {
+const endpointSchemas: Record<EModelEndpoint, EndpointSchema> = {
   [EModelEndpoint.openAI]: openAISchema,
   [EModelEndpoint.azureOpenAI]: openAISchema,
   [EModelEndpoint.custom]: openAISchema,
   [EModelEndpoint.google]: googleSchema,
   [EModelEndpoint.anthropic]: anthropicSchema,
+  [EModelEndpoint.chatGPTBrowser]: chatGPTBrowserSchema,
   [EModelEndpoint.gptPlugins]: gptPluginsSchema,
   [EModelEndpoint.assistants]: assistantSchema,
   [EModelEndpoint.azureAssistants]: assistantSchema,
@@ -165,8 +167,8 @@ export const parseConvo = ({
   conversation,
   possibleValues,
 }: {
-  endpoint: EndpointSchemaKey;
-  endpointType?: EndpointSchemaKey | null;
+  endpoint: EModelEndpoint;
+  endpointType?: EModelEndpoint | null;
   conversation: Partial<s.TConversation | s.TPreset> | null;
   possibleValues?: TPossibleValues;
   // TODO: POC for default schema
@@ -250,7 +252,7 @@ export const getResponseSender = (endpointOption: t.TEndpointOption): string => 
       return modelLabel;
     } else if (model && extractOmniVersion(model)) {
       return extractOmniVersion(model);
-    } else if (model && (model.includes('mistral') || model.includes('codestral'))) {
+    } else if (model && model.includes('mistral')) {
       return 'Mistral';
     } else if (model && model.includes('gpt-')) {
       const gptVersion = extractGPTVersion(model);
@@ -286,7 +288,7 @@ export const getResponseSender = (endpointOption: t.TEndpointOption): string => 
       return chatGptLabel;
     } else if (model && extractOmniVersion(model)) {
       return extractOmniVersion(model);
-    } else if (model && (model.includes('mistral') || model.includes('codestral'))) {
+    } else if (model && model.includes('mistral')) {
       return 'Mistral';
     } else if (model && model.includes('gpt-')) {
       const gptVersion = extractGPTVersion(model);
@@ -307,10 +309,11 @@ type CompactEndpointSchema =
   | typeof compactAgentsSchema
   | typeof compactGoogleSchema
   | typeof anthropicSchema
+  | typeof compactChatGPTSchema
   | typeof bedrockInputSchema
   | typeof compactPluginsSchema;
 
-const compactEndpointSchemas: Record<EndpointSchemaKey, CompactEndpointSchema> = {
+const compactEndpointSchemas: Record<string, CompactEndpointSchema> = {
   [EModelEndpoint.openAI]: openAISchema,
   [EModelEndpoint.azureOpenAI]: openAISchema,
   [EModelEndpoint.custom]: openAISchema,
@@ -320,6 +323,7 @@ const compactEndpointSchemas: Record<EndpointSchemaKey, CompactEndpointSchema> =
   [EModelEndpoint.google]: compactGoogleSchema,
   [EModelEndpoint.bedrock]: bedrockInputSchema,
   [EModelEndpoint.anthropic]: anthropicSchema,
+  [EModelEndpoint.chatGPTBrowser]: compactChatGPTSchema,
   [EModelEndpoint.gptPlugins]: compactPluginsSchema,
 };
 
@@ -329,8 +333,8 @@ export const parseCompactConvo = ({
   conversation,
   possibleValues,
 }: {
-  endpoint?: EndpointSchemaKey;
-  endpointType?: EndpointSchemaKey | null;
+  endpoint?: EModelEndpoint;
+  endpointType?: EModelEndpoint | null;
   conversation: Partial<s.TConversation | s.TPreset>;
   possibleValues?: TPossibleValues;
   // TODO: POC for default schema
@@ -367,10 +371,7 @@ export const parseCompactConvo = ({
   return convo;
 };
 
-export function parseTextParts(
-  contentParts: a.TMessageContentParts[],
-  skipReasoning: boolean = false,
-): string {
+export function parseTextParts(contentParts: a.TMessageContentParts[]): string {
   let result = '';
 
   for (const part of contentParts) {
@@ -389,7 +390,7 @@ export function parseTextParts(
         result += ' ';
       }
       result += textValue;
-    } else if (part.type === ContentTypes.THINK && !skipReasoning) {
+    } else if (part.type === ContentTypes.THINK) {
       const textValue = typeof part.think === 'string' ? part.think : '';
       if (
         result.length > 0 &&

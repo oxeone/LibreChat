@@ -28,10 +28,15 @@ class BaseClient {
       month: 'long',
       day: 'numeric',
     });
+    this.fetch = this.fetch.bind(this);
     /** @type {boolean} */
     this.skipSaveConvo = false;
     /** @type {boolean} */
     this.skipSaveUserMessage = false;
+    /** @type {ClientDatabaseSavePromise} */
+    this.userMessagePromise;
+    /** @type {ClientDatabaseSavePromise} */
+    this.responsePromise;
     /** @type {string} */
     this.user;
     /** @type {string} */
@@ -559,8 +564,6 @@ class BaseClient {
   }
 
   async sendMessage(message, opts = {}) {
-    /** @type {Promise<TMessage>} */
-    let userMessagePromise;
     const { user, head, isEdited, conversationId, responseMessageId, saveOptions, userMessage } =
       await this.handleStartMethods(message, opts);
 
@@ -622,11 +625,11 @@ class BaseClient {
     }
 
     if (!isEdited && !this.skipSaveUserMessage) {
-      userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
+      this.userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
       this.savedMessageIds.add(userMessage.messageId);
       if (typeof opts?.getReqData === 'function') {
         opts.getReqData({
-          userMessagePromise,
+          userMessagePromise: this.userMessagePromise,
         });
       }
     }
@@ -652,9 +655,7 @@ class BaseClient {
 
     /** @type {string|string[]|undefined} */
     const completion = await this.sendCompletion(payload, opts);
-    if (this.abortController) {
-      this.abortController.requestCompleted = true;
-    }
+    this.abortController.requestCompleted = true;
 
     /** @type {TMessage} */
     const responseMessage = {
@@ -675,8 +676,7 @@ class BaseClient {
       responseMessage.text = addSpaceIfNeeded(generation) + completion;
     } else if (
       Array.isArray(completion) &&
-      (this.clientName === EModelEndpoint.agents ||
-        isParamEndpoint(this.options.endpoint, this.options.endpointType))
+      isParamEndpoint(this.options.endpoint, this.options.endpointType)
     ) {
       responseMessage.text = '';
       responseMessage.content = completion;
@@ -702,13 +702,7 @@ class BaseClient {
       if (usage != null && Number(usage[this.outputTokensKey]) > 0) {
         responseMessage.tokenCount = usage[this.outputTokensKey];
         completionTokens = responseMessage.tokenCount;
-        await this.updateUserMessageTokenCount({
-          usage,
-          tokenCountMap,
-          userMessage,
-          userMessagePromise,
-          opts,
-        });
+        await this.updateUserMessageTokenCount({ usage, tokenCountMap, userMessage, opts });
       } else {
         responseMessage.tokenCount = this.getTokenCountForResponse(responseMessage);
         completionTokens = responseMessage.tokenCount;
@@ -717,8 +711,8 @@ class BaseClient {
       await this.recordTokenUsage({ promptTokens, completionTokens, usage });
     }
 
-    if (userMessagePromise) {
-      await userMessagePromise;
+    if (this.userMessagePromise) {
+      await this.userMessagePromise;
     }
 
     if (this.artifactPromises) {
@@ -733,11 +727,7 @@ class BaseClient {
       }
     }
 
-    responseMessage.databasePromise = this.saveMessageToDatabase(
-      responseMessage,
-      saveOptions,
-      user,
-    );
+    this.responsePromise = this.saveMessageToDatabase(responseMessage, saveOptions, user);
     this.savedMessageIds.add(responseMessage.messageId);
     delete responseMessage.tokenCount;
     return responseMessage;
@@ -758,16 +748,9 @@ class BaseClient {
    * @param {StreamUsage} params.usage
    * @param {Record<string, number>} params.tokenCountMap
    * @param {TMessage} params.userMessage
-   * @param {Promise<TMessage>} params.userMessagePromise
    * @param {object} params.opts
    */
-  async updateUserMessageTokenCount({
-    usage,
-    tokenCountMap,
-    userMessage,
-    userMessagePromise,
-    opts,
-  }) {
+  async updateUserMessageTokenCount({ usage, tokenCountMap, userMessage, opts }) {
     /** @type {boolean} */
     const shouldUpdateCount =
       this.calculateCurrentTokenCount != null &&
@@ -803,7 +786,7 @@ class BaseClient {
       Note: we update the user message to be sure it gets the calculated token count;
       though `AskController` saves the user message, EditController does not
     */
-    await userMessagePromise;
+    await this.userMessagePromise;
     await this.updateMessageInDatabase({
       messageId: userMessage.messageId,
       tokenCount: userMessageTokenCount,
@@ -869,7 +852,7 @@ class BaseClient {
     }
 
     const savedMessage = await saveMessage(
-      this.options?.req,
+      this.options.req,
       {
         ...message,
         endpoint: this.options.endpoint,
@@ -893,7 +876,7 @@ class BaseClient {
     const existingConvo =
       this.fetchedConvo === true
         ? null
-        : await getConvo(this.options?.req?.user?.id, message.conversationId);
+        : await getConvo(this.options.req?.user?.id, message.conversationId);
 
     const unsetFields = {};
     const exceptions = new Set(['spec', 'iconURL']);
@@ -913,7 +896,7 @@ class BaseClient {
       }
     }
 
-    const conversation = await saveConvo(this.options?.req, fieldsToKeep, {
+    const conversation = await saveConvo(this.options.req, fieldsToKeep, {
       context: 'api/app/clients/BaseClient.js - saveMessageToDatabase #saveConvo',
       unsetFields,
     });

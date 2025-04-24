@@ -153,12 +153,6 @@ function getLLMConfig(apiKey, options = {}, endpoint = null) {
     delete llmConfig.reasoning_effort;
   }
 
-  if (llmConfig?.['max_tokens'] != null) {
-    /** @type {number} */
-    llmConfig.maxTokens = llmConfig['max_tokens'];
-    delete llmConfig['max_tokens'];
-  }
-
   return {
     /** @type {OpenAIClientOptions} */
     llmConfig,

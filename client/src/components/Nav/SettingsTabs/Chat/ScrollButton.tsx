@@ -1,19 +1,18 @@
 import { useRecoilState } from 'recoil';
-import HoverCardSettings from '../HoverCardSettings';
-import { Switch } from '~/components/ui';
+import { Switch } from '~/components/ui/Switch';
 import useLocalize from '~/hooks/useLocalize';
 import store from '~/store';
 
-export default function SaveBadgesState({
+export default function ScrollButton({
   onCheckedChange,
 }: {
   onCheckedChange?: (value: boolean) => void;
 }) {
-  const [saveBadgesState, setSaveBadgesState] = useRecoilState<boolean>(store.saveBadgesState);
+  const [showScrollButton, setShowScrollButton] = useRecoilState<boolean>(store.showScrollButton);
   const localize = useLocalize();
 
   const handleCheckedChange = (value: boolean) => {
-    setSaveBadgesState(value);
+    setShowScrollButton(value);
     if (onCheckedChange) {
       onCheckedChange(value);
     }
@@ -22,15 +21,14 @@ export default function SaveBadgesState({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <div>{localize('com_nav_save_badges_state')}</div>
-        <HoverCardSettings side="bottom" text="com_nav_info_save_badges_state" />
+        <div>{localize('com_nav_scroll_button')}</div>
       </div>
       <Switch
-        id="saveBadgesState"
-        checked={saveBadgesState}
+        id="scrollButton"
+        checked={showScrollButton}
         onCheckedChange={handleCheckedChange}
         className="ml-4"
-        data-testid="saveBadgesState"
+        data-testid="scrollButton"
       />
     </div>
   );

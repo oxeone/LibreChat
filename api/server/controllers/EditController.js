@@ -1,15 +1,5 @@
 const { getResponseSender } = require('librechat-data-provider');
-const {
-  handleAbortError,
-  createAbortController,
-  cleanupAbortController,
-} = require('~/server/middleware');
-const {
-  disposeClient,
-  processReqData,
-  clientRegistry,
-  requestDataMap,
-} = require('~/server/cleanup');
+const { createAbortController, handleAbortError } = require('~/server/middleware');
 const { sendMessage, createOnProgress } = require('~/server/utils');
 const { saveMessage } = require('~/models');
 const { logger } = require('~/config');
@@ -27,11 +17,6 @@ const EditController = async (req, res, next, initializeClient) => {
     overrideParentMessageId = null,
   } = req.body;
 
-  let client = null;
-  let abortKey = null;
-  let cleanupHandlers = [];
-  let clientRef = null; // Declare clientRef here
-
   logger.debug('[EditController]', {
     text,
     generation,
@@ -41,204 +26,123 @@ const EditController = async (req, res, next, initializeClient) => {
     modelsConfig: endpointOption.modelsConfig ? 'exists' : '',
   });
 
-  let userMessage = null;
-  let userMessagePromise = null;
-  let promptTokens = null;
-  let getAbortData = null;
-
+  let userMessage;
+  let userMessagePromise;
+  let promptTokens;
   const sender = getResponseSender({
     ...endpointOption,
     model: endpointOption.modelOptions.model,
     modelDisplayLabel,
   });
   const userMessageId = parentMessageId;
-  const userId = req.user.id;
+  const user = req.user.id;
 
-  let reqDataContext = { userMessage, userMessagePromise, responseMessageId, promptTokens };
-
-  const updateReqData = (data = {}) => {
-    reqDataContext = processReqData(data, reqDataContext);
-    abortKey = reqDataContext.abortKey;
-    userMessage = reqDataContext.userMessage;
-    userMessagePromise = reqDataContext.userMessagePromise;
-    responseMessageId = reqDataContext.responseMessageId;
-    promptTokens = reqDataContext.promptTokens;
+  const getReqData = (data = {}) => {
+    for (let key in data) {
+      if (key === 'userMessage') {
+        userMessage = data[key];
+      } else if (key === 'userMessagePromise') {
+        userMessagePromise = data[key];
+      } else if (key === 'responseMessageId') {
+        responseMessageId = data[key];
+      } else if (key === 'promptTokens') {
+        promptTokens = data[key];
+      }
+    }
   };
 
-  let { onProgress: progressCallback, getPartialText } = createOnProgress({
+  const { onProgress: progressCallback, getPartialText } = createOnProgress({
     generation,
   });
 
-  const performCleanup = () => {
-    logger.debug('[EditController] Performing cleanup');
-    if (Array.isArray(cleanupHandlers)) {
-      for (const handler of cleanupHandlers) {
-        try {
-          if (typeof handler === 'function') {
-            handler();
-          }
-        } catch (e) {
-          // Ignore
-        }
-      }
-    }
-
-    if (abortKey) {
-      logger.debug('[AskController] Cleaning up abort controller');
-      cleanupAbortController(abortKey);
-      abortKey = null;
-    }
-
-    if (client) {
-      disposeClient(client);
-      client = null;
-    }
-
-    reqDataContext = null;
-    userMessage = null;
-    userMessagePromise = null;
-    promptTokens = null;
-    getAbortData = null;
-    progressCallback = null;
-    endpointOption = null;
-    cleanupHandlers = null;
-
-    if (requestDataMap.has(req)) {
-      requestDataMap.delete(req);
-    }
-    logger.debug('[EditController] Cleanup completed');
-  };
+  let getText;
 
   try {
-    ({ client } = await initializeClient({ req, res, endpointOption }));
+    const { client } = await initializeClient({ req, res, endpointOption });
 
-    if (clientRegistry && client) {
-      clientRegistry.register(client, { userId }, client);
-    }
+    getText = client.getStreamText != null ? client.getStreamText.bind(client) : getPartialText;
 
-    if (client) {
-      requestDataMap.set(req, { client });
-    }
+    const getAbortData = () => ({
+      conversationId,
+      userMessagePromise,
+      messageId: responseMessageId,
+      sender,
+      parentMessageId: overrideParentMessageId ?? userMessageId,
+      text: getText(),
+      userMessage,
+      promptTokens,
+    });
 
-    clientRef = new WeakRef(client);
+    const { abortController, onStart } = createAbortController(req, res, getAbortData, getReqData);
 
-    getAbortData = () => {
-      const currentClient = clientRef.deref();
-      const currentText =
-        currentClient?.getStreamText != null ? currentClient.getStreamText() : getPartialText();
-
-      return {
-        sender,
-        conversationId,
-        messageId: reqDataContext.responseMessageId,
-        parentMessageId: overrideParentMessageId ?? userMessageId,
-        text: currentText,
-        userMessage: userMessage,
-        userMessagePromise: userMessagePromise,
-        promptTokens: reqDataContext.promptTokens,
-      };
-    };
-
-    const { onStart, abortController } = createAbortController(
-      req,
-      res,
-      getAbortData,
-      updateReqData,
-    );
-
-    const closeHandler = () => {
+    res.on('close', () => {
       logger.debug('[EditController] Request closed');
-      if (!abortController || abortController.signal.aborted || abortController.requestCompleted) {
+      if (!abortController) {
+        return;
+      } else if (abortController.signal.aborted) {
+        return;
+      } else if (abortController.requestCompleted) {
         return;
       }
+
       abortController.abort();
       logger.debug('[EditController] Request aborted on close');
-    };
-
-    res.on('close', closeHandler);
-    cleanupHandlers.push(() => {
-      try {
-        res.removeListener('close', closeHandler);
-      } catch (e) {
-        // Ignore
-      }
     });
 
     let response = await client.sendMessage(text, {
-      user: userId,
+      user,
       generation,
       isContinued,
       isEdited: true,
       conversationId,
       parentMessageId,
-      responseMessageId: reqDataContext.responseMessageId,
+      responseMessageId,
       overrideParentMessageId,
-      getReqData: updateReqData,
+      getReqData,
       onStart,
       abortController,
       progressCallback,
       progressOptions: {
         res,
+        // parentMessageId: overrideParentMessageId || userMessageId,
       },
     });
 
-    const databasePromise = response.databasePromise;
-    delete response.databasePromise;
-
-    const { conversation: convoData = {} } = await databasePromise;
-    const conversation = { ...convoData };
+    const { conversation = {} } = await client.responsePromise;
     conversation.title =
       conversation && !conversation.title ? null : conversation?.title || 'New Chat';
 
-    if (client?.options?.attachments && endpointOption?.modelOptions?.model) {
+    if (client.options.attachments) {
       conversation.model = endpointOption.modelOptions.model;
     }
 
     if (!abortController.signal.aborted) {
-      const finalUserMessage = reqDataContext.userMessage;
-      const finalResponseMessage = { ...response };
-
       sendMessage(res, {
         final: true,
         conversation,
         title: conversation.title,
-        requestMessage: finalUserMessage,
-        responseMessage: finalResponseMessage,
+        requestMessage: userMessage,
+        responseMessage: response,
       });
       res.end();
 
       await saveMessage(
         req,
-        { ...finalResponseMessage, user: userId },
+        { ...response, user },
         { context: 'api/server/controllers/EditController.js - response end' },
       );
     }
-
-    performCleanup();
   } catch (error) {
-    logger.error('[EditController] Error handling request', error);
-    let partialText = '';
-    try {
-      const currentClient = clientRef.deref();
-      partialText =
-        currentClient?.getStreamText != null ? currentClient.getStreamText() : getPartialText();
-    } catch (getTextError) {
-      logger.error('[EditController] Error calling getText() during error handling', getTextError);
-    }
-
+    const partialText = getText();
     handleAbortError(res, req, error, {
       sender,
       partialText,
       conversationId,
-      messageId: reqDataContext.responseMessageId,
+      messageId: responseMessageId,
       parentMessageId: overrideParentMessageId ?? userMessageId ?? parentMessageId,
-    })
-      .catch((err) => {
-        logger.error('[EditController] Error in `handleAbortError` during catch block', err);
-      })
-      .finally(() => {
-        performCleanup();
-      });
+    }).catch((err) => {
+      logger.error('[EditController] Error in `handleAbortError`', err);
+    });
   }
 };
 

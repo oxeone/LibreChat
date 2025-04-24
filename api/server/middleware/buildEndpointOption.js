@@ -1,11 +1,6 @@
-const {
-  parseCompactConvo,
-  EModelEndpoint,
-  isAgentsEndpoint,
-  EndpointURLs,
-} = require('librechat-data-provider');
-const azureAssistants = require('~/server/services/Endpoints/azureAssistants');
+const { parseCompactConvo, EModelEndpoint, isAgentsEndpoint } = require('librechat-data-provider');
 const { getModelsConfig } = require('~/server/controllers/ModelController');
+const azureAssistants = require('~/server/services/Endpoints/azureAssistants');
 const assistants = require('~/server/services/Endpoints/assistants');
 const gptPlugins = require('~/server/services/Endpoints/gptPlugins');
 const { processFiles } = require('~/server/services/Files/process');
@@ -82,9 +77,8 @@ async function buildEndpointOption(req, res, next) {
   }
 
   try {
-    const isAgents =
-      isAgentsEndpoint(endpoint) || req.baseUrl.startsWith(EndpointURLs[EModelEndpoint.agents]);
-    const endpointFn = buildFunction[isAgents ? EModelEndpoint.agents : (endpointType ?? endpoint)];
+    const isAgents = isAgentsEndpoint(endpoint);
+    const endpointFn = buildFunction[endpointType ?? endpoint];
     const builder = isAgents ? (...args) => endpointFn(req, ...args) : endpointFn;
 
     // TODO: use object params

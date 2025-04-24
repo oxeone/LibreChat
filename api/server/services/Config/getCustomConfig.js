@@ -31,16 +31,19 @@ async function getCustomConfig() {
 async function getBalanceConfig() {
   const isLegacyEnabled = isEnabled(process.env.CHECK_BALANCE);
   const startBalance = process.env.START_BALANCE;
-  /** @type {TCustomConfig['balance']} */
-  const config = {
-    enabled: isLegacyEnabled,
-    startBalance: startBalance != null && startBalance ? parseInt(startBalance, 10) : undefined,
-  };
-  const customConfig = await getCustomConfig();
-  if (!customConfig) {
+  if (isLegacyEnabled || (startBalance != null && startBalance)) {
+    /** @type {TCustomConfig['balance']} */
+    const config = {
+      enabled: isLegacyEnabled,
+      startBalance: startBalance ? parseInt(startBalance, 10) : undefined,
+    };
     return config;
   }
-  return { ...config, ...(customConfig?.['balance'] ?? {}) };
+  const customConfig = await getCustomConfig();
+  if (!customConfig) {
+    return null;
+  }
+  return customConfig?.['balance'] ?? null;
 }
 
 /**

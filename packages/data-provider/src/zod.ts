@@ -7,7 +7,6 @@ export type JsonSchemaType = {
   properties?: Record<string, JsonSchemaType>;
   required?: string[];
   description?: string;
-  additionalProperties?: boolean | JsonSchemaType;
 };
 
 function isEmptyObjectSchema(jsonSchema?: JsonSchemaType): boolean {
@@ -73,20 +72,7 @@ export function convertJsonSchemaToZod(
     } else {
       objectSchema = objectSchema.partial();
     }
-
-    // Handle additionalProperties for open-ended objects
-    if (schema.additionalProperties === true) {
-      // This allows any additional properties with any type
-      zodSchema = objectSchema.passthrough();
-    } else if (typeof schema.additionalProperties === 'object') {
-      // For specific additional property types
-      const additionalSchema = convertJsonSchemaToZod(
-        schema.additionalProperties as JsonSchemaType,
-      );
-      zodSchema = objectSchema.catchall(additionalSchema as z.ZodType);
-    } else {
-      zodSchema = objectSchema;
-    }
+    zodSchema = objectSchema;
   } else {
     zodSchema = z.unknown();
   }

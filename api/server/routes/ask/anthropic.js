@@ -11,6 +11,8 @@ const {
 
 const router = express.Router();
 
+router.post('/abort', handleAbort());
+
 router.post(
   '/',
   validateEndpoint,

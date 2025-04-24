@@ -29,6 +29,7 @@ export enum STTEndpoints {
 
 export enum TTSEndpoints {
   browser = 'browser',
+  edge = 'edge',
   external = 'external',
 }
 
@@ -306,7 +307,7 @@ export type TAskProps = {
 export type TOptions = {
   editedMessageId?: string | null;
   editedText?: string | null;
-  isResubmission?: boolean;
+  resubmitFiles?: boolean;
   isRegenerate?: boolean;
   isContinued?: boolean;
   isEdited?: boolean;
@@ -548,8 +549,7 @@ export type TResData = TBaseResData & {
   responseMessage: t.TMessage;
 };
 
-export type TFinalResData = Omit<TBaseResData, 'conversation'> & {
-  conversation: Partial<t.TConversation> & Pick<t.TConversation, 'conversationId'>;
+export type TFinalResData = TBaseResData & {
   requestMessage?: t.TMessage;
   responseMessage?: t.TMessage;
 };

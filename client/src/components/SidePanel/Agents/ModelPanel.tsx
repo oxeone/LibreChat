@@ -12,7 +12,7 @@ import { getEndpointField, cn } from '~/utils';
 import { useLocalize } from '~/hooks';
 import { Panel } from '~/common';
 
-export default function ModelPanel({
+export default function Parameters({
   setActivePanel,
   providers,
   models: modelsData,

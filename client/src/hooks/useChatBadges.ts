@@ -1,56 +1,35 @@
-import { useMemo } from 'react';
-import { useRecoilCallback } from 'recoil';
 import { useRecoilValue } from 'recoil';
 import { MessageCircleDashed, Box } from 'lucide-react';
 import type { BadgeItem } from '~/common';
-import { useLocalize, TranslationKeys } from '~/hooks';
+import { useLocalize } from '~/hooks';
 import store from '~/store';
 
-interface ChatBadgeConfig {
-  id: string;
-  icon: typeof Box;
-  label: string;
-  atom?: any;
-}
-
-const badgeConfig: ReadonlyArray<ChatBadgeConfig> = [
+const badgeConfig = [
+  {
+    id: '1',
+    icon: MessageCircleDashed,
+    label: 'com_ui_temporary',
+    atom: store.isTemporary,
+  },
   // {
-  //   id: '1',
+  //   id: '2',
   //   icon: Box,
   //   label: 'com_ui_artifacts',
   //   atom: store.codeArtifacts,
   // },
   // TODO: add more badges here (missing store atoms)
-];
+] as const;
 
 export default function useChatBadges(): BadgeItem[] {
   const localize = useLocalize();
   const activeBadges = useRecoilValue(store.chatBadges) as Array<{ id: string }>;
-  const activeBadgeIds = useMemo(
-    () => new Set(activeBadges.map((badge) => badge.id)),
-    [activeBadges],
-  );
-  const allBadges = useMemo(() => {
-    return (
-      badgeConfig.map((cfg) => ({
-        id: cfg.id,
-        label: localize(cfg.label as TranslationKeys),
-        icon: cfg.icon,
-        atom: cfg.atom,
-        isAvailable: activeBadgeIds.has(cfg.id),
-      })) || []
-    );
-  }, [activeBadgeIds, localize]);
-  return allBadges;
-}
+  const activeBadgeIds = new Set(activeBadges.map((badge) => badge.id));
 
-export function useResetChatBadges() {
-  return useRecoilCallback(
-    ({ reset }) =>
-      () => {
-        badgeConfig.forEach(({ atom }) => reset(atom));
-        reset(store.chatBadges);
-      },
-    [],
-  );
+  return badgeConfig.map((cfg) => ({
+    id: cfg.id,
+    label: localize(cfg.label),
+    icon: cfg.icon,
+    atom: cfg.atom,
+    isAvailable: activeBadgeIds.has(cfg.id),
+  }));
 }

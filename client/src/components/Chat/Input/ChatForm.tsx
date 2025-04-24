@@ -1,7 +1,7 @@
 import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useWatch } from 'react-hook-form';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
+import { isAssistantsEndpoint } from 'librechat-data-provider';
 import {
   useChatContext,
   useChatFormContext,
@@ -28,8 +28,8 @@ import CollapseChat from './CollapseChat';
 import StreamAudio from './StreamAudio';
 import StopButton from './StopButton';
 import SendButton from './SendButton';
+import { BadgeRow } from './BadgeRow';
 import EditBadges from './EditBadges';
-import BadgeRow from './BadgeRow';
 import Mention from './Mention';
 import store from '~/store';
 
@@ -43,14 +43,12 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const [backupBadges, setBackupBadges] = useState<Pick<BadgeItem, 'id'>[]>([]);
 
-  const search = useRecoilValue(store.search);
   const SpeechToText = useRecoilValue(store.speechToText);
   const TextToSpeech = useRecoilValue(store.textToSpeech);
-  const chatDirection = useRecoilValue(store.chatDirection);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
   const maximizeChatSpace = useRecoilValue(store.maximizeChatSpace);
-  const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
-  const isTemporary = useRecoilValue(store.isTemporary);
+  const chatDirection = useRecoilValue(store.chatDirection);
+  const isSearching = useRecoilValue(store.isSearching);
 
   const [badges, setBadges] = useRecoilState(store.chatBadges);
   const [isEditingBadges, setIsEditingBadges] = useRecoilState(store.isEditingBadges);
@@ -85,15 +83,8 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
     () => conversation?.endpointType ?? conversation?.endpoint,
     [conversation?.endpointType, conversation?.endpoint],
   );
-  const conversationId = useMemo(
-    () => conversation?.conversationId ?? Constants.NEW_CONVO,
-    [conversation?.conversationId],
-  );
 
-  const isRTL = useMemo(
-    () => (chatDirection != null ? chatDirection?.toLowerCase() === 'rtl' : false),
-    [chatDirection],
-  );
+  const isRTL = useMemo(() => chatDirection === 'rtl', [chatDirection.toLowerCase()]);
   const invalidAssistant = useMemo(
     () =>
       isAssistantsEndpoint(endpoint) &&
@@ -117,11 +108,10 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
   }, [isCollapsed]);
 
   useAutoSave({
+    conversationId: conversation?.conversationId,
+    textAreaRef,
     files,
     setFiles,
-    textAreaRef,
-    conversationId,
-    isSubmitting: isSubmitting || isSubmittingAdded,
   });
 
   const { submitMessage, submitPrompt } = useSubmitMessage();
@@ -152,10 +142,10 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
   const textValue = useWatch({ control: methods.control, name: 'text' });
 
   useEffect(() => {
-    if (!search.isSearching && textAreaRef.current && !disableInputs) {
+    if (!isSearching && textAreaRef.current && !disableInputs) {
       textAreaRef.current.focus();
     }
-  }, [search.isSearching, disableInputs]);
+  }, [isSearching, disableInputs]);
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -174,7 +164,7 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
   const handleSaveBadges = useCallback(() => {
     setIsEditingBadges(false);
     setBackupBadges([]);
-  }, [setIsEditingBadges, setBackupBadges]);
+  }, []);
 
   const handleCancelBadges = useCallback(() => {
     if (backupBadges.length > 0) {
@@ -182,14 +172,14 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
     }
     setIsEditingBadges(false);
     setBackupBadges([]);
-  }, [backupBadges, setBadges, setIsEditingBadges]);
+  }, [backupBadges, setBadges]);
 
   const isMoreThanThreeRows = visualRowCount > 3;
 
   const baseClasses = useMemo(
     () =>
       cn(
-        'md:py-3.5 m-0 w-full resize-none py-[13px] placeholder-black/50 bg-transparent dark:placeholder-white/50 [&:has(textarea:focus)]:shadow-[0_2px_6px_rgba(0,0,0,.05)]',
+        'md:py-3.5 m-0 w-full resize-none py-[13px] bg-surface-chat placeholder-black/50 dark:placeholder-white/50 [&:has(textarea:focus)]:shadow-[0_2px_6px_rgba(0,0,0,.05)]',
         isCollapsed ? 'max-h-[52px]' : 'max-h-[45vh] md:max-h-[55vh]',
         isMoreThanThreeRows ? 'pl-5' : 'px-5',
       ),
@@ -200,14 +190,8 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
     <form
       onSubmit={methods.handleSubmit(submitMessage)}
       className={cn(
-        'mx-auto flex flex-row gap-3 sm:px-2',
+        'mx-auto flex flex-row gap-3 transition-all duration-200 sm:mb-2 sm:px-2',
         maximizeChatSpace ? 'w-full max-w-full' : 'md:max-w-3xl xl:max-w-4xl',
-        centerFormOnLanding &&
-          (conversationId == null || conversationId === Constants.NEW_CONVO) &&
-          !isSubmitting &&
-          conversation?.messages?.length === 0
-          ? 'transition-all duration-200 sm:mb-28'
-          : 'sm:mb-10',
       )}
     >
       <div className="relative flex h-full flex-1 items-stretch md:flex-col">
@@ -233,11 +217,8 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
           <div
             onClick={handleContainerClick}
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-3xl sm:pb-0',
+              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border border-border-light bg-surface-chat pb-4 text-text-primary transition-all duration-200 sm:rounded-3xl sm:pb-0',
               isTextAreaFocused ? 'shadow-lg' : 'shadow-md',
-              isTemporary
-                ? 'border-violet-800/60 bg-violet-950/10'
-                : 'border-border-light bg-surface-chat',
             )}
           >
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
@@ -298,9 +279,7 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
                 <AttachFileChat disableInputs={disableInputs} />
               </div>
               <BadgeRow
-                showEphemeralBadges={!isAgentsEndpoint(endpoint) && !isAssistantsEndpoint(endpoint)}
-                conversationId={conversationId}
-                onChange={setBadges}
+                onChange={(newBadges) => setBadges(newBadges)}
                 isInChat={
                   Array.isArray(conversation?.messages) && conversation.messages.length >= 1
                 }

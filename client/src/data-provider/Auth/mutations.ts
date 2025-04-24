@@ -4,7 +4,6 @@ import { MutationKeys, QueryKeys, dataService, request } from 'librechat-data-pr
 import type { UseMutationResult } from '@tanstack/react-query';
 import type * as t from 'librechat-data-provider';
 import useClearStates from '~/hooks/Config/useClearStates';
-import { clearAllConversationStorage } from '~/utils';
 import store from '~/store';
 
 /* login/logout */
@@ -80,7 +79,6 @@ export const useDeleteUserMutation = (
     onSuccess: (...args) => {
       resetDefaultPreset();
       clearStates();
-      clearAllConversationStorage();
       queryClient.removeQueries();
       options?.onSuccess?.(...args);
     },

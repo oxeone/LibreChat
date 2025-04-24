@@ -53,27 +53,27 @@ export default function AgentConfig({
   const agent_id = useWatch({ control, name: 'id' });
 
   const toolsEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.tools) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.tools),
     [agentsConfig],
   );
   const actionsEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.actions) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.actions),
     [agentsConfig],
   );
   const artifactsEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.artifacts) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.artifacts) ?? false,
     [agentsConfig],
   );
   const ocrEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.ocr) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.ocr) ?? false,
     [agentsConfig],
   );
   const fileSearchEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.file_search) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.file_search) ?? false,
     [agentsConfig],
   );
   const codeEnabled = useMemo(
-    () => agentsConfig?.capabilities?.includes(AgentCapabilities.execute_code) ?? false,
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.execute_code) ?? false,
     [agentsConfig],
   );
 

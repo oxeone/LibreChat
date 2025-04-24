@@ -1,6 +1,5 @@
 import * as types from '../types';
 import * as r from '../roles';
-import * as p from '../permissions';
 import {
   Tools,
   Assistant,
@@ -164,11 +163,6 @@ export type DeleteConversationOptions = MutationOptions<
   types.TDeleteConversationRequest
 >;
 
-export type ArchiveConversationOptions = MutationOptions<
-  types.TArchiveConversationResponse,
-  types.TArchiveConversationRequest
->;
-
 export type DuplicateConvoOptions = MutationOptions<
   types.TDuplicateConvoResponse,
   types.TDuplicateConvoRequest
@@ -257,9 +251,9 @@ export type UpdatePermVars<T> = {
   updates: Partial<T>;
 };
 
-export type UpdatePromptPermVars = UpdatePermVars<p.TPromptPermissions>;
+export type UpdatePromptPermVars = UpdatePermVars<r.TPromptPermissions>;
 
-export type UpdateAgentPermVars = UpdatePermVars<p.TAgentPermissions>;
+export type UpdateAgentPermVars = UpdatePermVars<r.TAgentPermissions>;
 
 export type UpdatePermResponse = r.TRole;
 

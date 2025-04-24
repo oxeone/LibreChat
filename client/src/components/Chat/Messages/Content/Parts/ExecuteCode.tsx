@@ -7,7 +7,7 @@ import MarkdownLite from '~/components/Chat/Messages/Content/MarkdownLite';
 import { useProgress, useLocalize } from '~/hooks';
 import { CodeInProgress } from './CodeProgress';
 import Attachment from './Attachment';
-import Stdout from './Stdout';
+import LogContent from './LogContent';
 import store from '~/store';
 
 interface ParsedArgs {
@@ -17,17 +17,8 @@ interface ParsedArgs {
 
 export function useParseArgs(args: string): ParsedArgs {
   return useMemo(() => {
-    let parsedArgs: ParsedArgs | string = args;
-    try {
-      parsedArgs = JSON.parse(args);
-    } catch {
-      // console.error('Failed to parse args:', e);
-    }
-    if (typeof parsedArgs === 'object') {
-      return parsedArgs;
-    }
     const langMatch = args.match(/"lang"\s*:\s*"(\w+)"/);
-    const codeMatch = args.match(/"code"\s*:\s*"(.+?)(?="\s*,\s*"(session_id|args)"|"\s*})/s);
+    const codeMatch = args.match(/"code"\s*:\s*"(.+?)(?="\s*,\s*"args"|$)/s);
 
     let code = '';
     if (codeMatch) {
@@ -35,7 +26,7 @@ export function useParseArgs(args: string): ParsedArgs {
       if (code.endsWith('"}')) {
         code = code.slice(0, -2);
       }
-      code = code.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      code = code.replace(/\\n/g, '\n').replace(/\\/g, '');
     }
 
     return {
@@ -108,17 +99,15 @@ export default function ExecuteCode({
                   color: 'white',
                 }}
               >
-                <Stdout output={output} />
+                <pre className="shrink-0">
+                  <LogContent output={output} attachments={attachments} />
+                </pre>
               </div>
             </div>
           )}
         </div>
       )}
-      <div className="mb-2 flex flex-wrap items-center gap-2.5">
-        {attachments?.map((attachment, index) => (
-          <Attachment attachment={attachment} key={index} />
-        ))}
-      </div>
+      {attachments?.map((attachment, index) => <Attachment attachment={attachment} key={index} />)}
     </>
   );
 }

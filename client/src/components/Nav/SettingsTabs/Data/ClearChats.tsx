@@ -3,7 +3,6 @@ import { useClearConversationsMutation } from 'librechat-data-provider/react-que
 import { Label, Button, OGDialog, OGDialogTrigger, Spinner } from '~/components';
 import { useLocalize, useNewConvo } from '~/hooks';
 import OGDialogTemplate from '~/components/ui/OGDialogTemplate';
-import { clearAllConversationStorage } from '~/utils';
 
 export const ClearChats = () => {
   const localize = useLocalize();
@@ -16,7 +15,6 @@ export const ClearChats = () => {
       {},
       {
         onSuccess: () => {
-          clearAllConversationStorage();
           newConversation();
         },
       },

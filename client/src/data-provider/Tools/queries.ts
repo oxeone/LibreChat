@@ -34,7 +34,6 @@ export const useGetToolCalls = <TData = t.ToolCallResults>(
       enabled:
         conversationId.length > 0 &&
         conversationId !== Constants.NEW_CONVO &&
-        conversationId !== Constants.PENDING_CONVO &&
         conversationId !== Constants.SEARCH,
       ...config,
     },

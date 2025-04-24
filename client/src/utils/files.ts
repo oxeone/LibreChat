@@ -48,7 +48,6 @@ export const fileTypes = {
     title: 'File',
   },
   text: textDocument,
-  txt: textDocument,
   // application:,
 
   /* Partial matches */

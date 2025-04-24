@@ -5,7 +5,7 @@ export default function FileIcon({
   file,
   fileType,
 }: {
-  file?: Partial<ExtendedFile | TFile>;
+  file?: ExtendedFile | TFile;
   fileType: {
     fill: string;
     paths: React.FC;

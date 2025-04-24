@@ -1,24 +1,4 @@
 import type { AssistantsEndpoint } from './schemas';
-import * as q from './types/queries';
-
-// Testing this buildQuery function
-const buildQuery = (params: Record<string, unknown>): string => {
-  const query = Object.entries(params)
-    .filter(([, value]) => {
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
-      return value !== undefined && value !== null && value !== '';
-    })
-    .map(([key, value]) => {
-      if (Array.isArray(value)) {
-        return value.map((v) => `${key}=${encodeURIComponent(v)}`).join('&');
-      }
-      return `${key}=${encodeURIComponent(String(value))}`;
-    })
-    .join('&');
-  return query ? `?${query}` : '';
-};
 
 export const health = () => '/health';
 export const user = () => '/api/user';
@@ -29,19 +9,8 @@ export const userPlugins = () => '/api/user/plugins';
 
 export const deleteUser = () => '/api/user/delete';
 
-export const messages = (params: q.MessagesListParams) => {
-  const { conversationId, messageId, ...rest } = params;
-
-  if (conversationId && messageId) {
-    return `/api/messages/${conversationId}/${messageId}`;
-  }
-
-  if (conversationId) {
-    return `/api/messages/${conversationId}`;
-  }
-
-  return `/api/messages${buildQuery(rest)}`;
-};
+export const messages = (conversationId: string, messageId?: string) =>
+  `/api/messages/${conversationId}${messageId != null && messageId ? `/${messageId}` : ''}`;
 
 const shareRoot = '/api/share';
 export const shareMessages = (shareId: string) => `${shareRoot}/${shareId}`;
@@ -74,9 +43,10 @@ export const abortRequest = (endpoint: string) => `/api/ask/${endpoint}/abort`;
 
 export const conversationsRoot = '/api/convos';
 
-export const conversations = (params: q.ConversationListParams) => {
-  return `${conversationsRoot}${buildQuery(params)}`;
-};
+export const conversations = (pageNumber: string, isArchived?: boolean, tags?: string[]) =>
+  `${conversationsRoot}?pageNumber=${pageNumber}${
+    isArchived === true ? '&isArchived=true' : ''
+  }${tags?.map((tag) => `&tags=${tag}`).join('')}`;
 
 export const conversationById = (id: string) => `${conversationsRoot}/${id}`;
 
@@ -84,9 +54,7 @@ export const genTitle = () => `${conversationsRoot}/gen_title`;
 
 export const updateConversation = () => `${conversationsRoot}/update`;
 
-export const deleteConversation = () => `${conversationsRoot}`;
-
-export const deleteAllConversation = () => `${conversationsRoot}/all`;
+export const deleteConversation = () => `${conversationsRoot}/clear`;
 
 export const importConversation = () => `${conversationsRoot}/import`;
 
@@ -94,8 +62,8 @@ export const forkConversation = () => `${conversationsRoot}/fork`;
 
 export const duplicateConversation = () => `${conversationsRoot}/duplicate`;
 
-export const search = (q: string, cursor?: string | null) =>
-  `/api/search?q=${q}${cursor ? `&cursor=${cursor}` : ''}`;
+export const search = (q: string, pageNumber: string) =>
+  `/api/search?q=${q}&pageNumber=${pageNumber}`;
 
 export const searchEnabled = () => '/api/search/enable';
 

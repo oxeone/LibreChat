@@ -17,9 +17,9 @@ const checkAccess = async (user, permissionType, permissions, bodyProps = {}, ch
   }
 
   const role = await getRoleByName(user.role);
-  if (role && role.permissions && role.permissions[permissionType]) {
+  if (role && role[permissionType]) {
     const hasAnyPermission = permissions.some((permission) => {
-      if (role.permissions[permissionType][permission]) {
+      if (role[permissionType][permission]) {
         return true;
       }
 

@@ -108,7 +108,7 @@ const getAvailableTools = async (req, res) => {
     const pluginManifest = availableTools;
     const customConfig = await getCustomConfig();
     if (customConfig?.mcpServers != null) {
-      const mcpManager = getMCPManager();
+      const mcpManager = await getMCPManager();
       await mcpManager.loadManifestTools(pluginManifest);
     }
 

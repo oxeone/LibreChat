@@ -1,7 +1,7 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import debounce from 'lodash/debounce';
-import { TrashIcon, MessageSquare, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { TrashIcon, MessageSquare, ArrowUpDown } from 'lucide-react';
 import type { SharedLinkItem, SharedLinksListParams } from 'librechat-data-provider';
 import {
   OGDialog,
@@ -9,11 +9,10 @@ import {
   OGDialogContent,
   OGDialogHeader,
   OGDialogTitle,
-  TooltipAnchor,
   Button,
+  TooltipAnchor,
   Label,
-  Spinner,
-} from '~/components';
+} from '~/components/ui';
 import { useDeleteSharedLinkMutation, useSharedLinksQuery } from '~/data-provider';
 import OGDialogTemplate from '~/components/ui/OGDialogTemplate';
 import { useLocalize, useMediaQuery } from '~/hooks';
@@ -21,6 +20,7 @@ import DataTable from '~/components/ui/DataTable';
 import { NotificationSeverity } from '~/common';
 import { useToastContext } from '~/Providers';
 import { formatDate } from '~/utils';
+import { Spinner } from '~/components/svg';
 
 const PAGE_SIZE = 25;
 
@@ -37,7 +37,6 @@ export default function SharedLinks() {
   const { showToast } = useToastContext();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const [queryParams, setQueryParams] = useState<SharedLinksListParams>(DEFAULT_PARAMS);
-  const [deleteRow, setDeleteRow] = useState<SharedLinkItem | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -145,6 +144,8 @@ export default function SharedLinks() {
     await fetchNextPage();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const [deleteRow, setDeleteRow] = useState<SharedLinkItem | null>(null);
+
   const confirmDelete = useCallback(() => {
     if (deleteRow) {
       handleDelete([deleteRow]);
@@ -156,30 +157,21 @@ export default function SharedLinks() {
     () => [
       {
         accessorKey: 'title',
-        header: () => {
-          const isSorted = queryParams.sortBy === 'title';
-          const sortDirection = queryParams.sortDirection;
+        header: ({ column }) => {
           return (
             <Button
               variant="ghost"
               className="px-2 py-0 text-xs hover:bg-surface-hover sm:px-2 sm:py-2 sm:text-sm"
-              onClick={() =>
-                handleSort('title', isSorted && sortDirection === 'asc' ? 'desc' : 'asc')
-              }
+              onClick={() => handleSort('title', column.getIsSorted() === 'asc' ? 'desc' : 'asc')}
             >
               {localize('com_ui_name')}
-              {isSorted && sortDirection === 'asc' && (
-                <ArrowUp className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
-              )}
-              {isSorted && sortDirection === 'desc' && (
-                <ArrowDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
-              )}
-              {!isSorted && <ArrowUpDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />}
+              <ArrowUpDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
             </Button>
           );
         },
         cell: ({ row }) => {
           const { title, shareId } = row.original;
+
           return (
             <div className="flex items-center gap-2">
               <Link
@@ -201,25 +193,17 @@ export default function SharedLinks() {
       },
       {
         accessorKey: 'createdAt',
-        header: () => {
-          const isSorted = queryParams.sortBy === 'createdAt';
-          const sortDirection = queryParams.sortDirection;
+        header: ({ column }) => {
           return (
             <Button
               variant="ghost"
               className="px-2 py-0 text-xs hover:bg-surface-hover sm:px-2 sm:py-2 sm:text-sm"
               onClick={() =>
-                handleSort('createdAt', isSorted && sortDirection === 'asc' ? 'desc' : 'asc')
+                handleSort('createdAt', column.getIsSorted() === 'asc' ? 'desc' : 'asc')
               }
             >
               {localize('com_ui_date')}
-              {isSorted && sortDirection === 'asc' && (
-                <ArrowUp className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
-              )}
-              {isSorted && sortDirection === 'desc' && (
-                <ArrowDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
-              )}
-              {!isSorted && <ArrowUpDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />}
+              <ArrowUpDown className="ml-2 h-3 w-4 sm:h-4 sm:w-4" />
             </Button>
           );
         },
@@ -256,7 +240,7 @@ export default function SharedLinks() {
                   <MessageSquare className="size-4" />
                 </Button>
               }
-            />
+            ></TooltipAnchor>
             <TooltipAnchor
               description={localize('com_ui_delete')}
               render={
@@ -272,12 +256,12 @@ export default function SharedLinks() {
                   <TrashIcon className="size-4" />
                 </Button>
               }
-            />
+            ></TooltipAnchor>
           </div>
         ),
       },
     ],
-    [isSmallScreen, localize, queryParams, handleSort],
+    [isSmallScreen, localize],
   );
 
   return (
@@ -307,7 +291,6 @@ export default function SharedLinks() {
             showCheckboxes={false}
             onFilterChange={debouncedFilterChange}
             filterValue={queryParams.search}
-            isLoading={isLoading}
           />
         </OGDialogContent>
       </OGDialog>

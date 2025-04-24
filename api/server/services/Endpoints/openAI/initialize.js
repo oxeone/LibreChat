@@ -6,10 +6,9 @@ const {
 } = require('librechat-data-provider');
 const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
 const { getLLMConfig } = require('~/server/services/Endpoints/openAI/llm');
-const { createHandleLLMNewToken } = require('~/app/clients/generators');
-const { isEnabled, isUserProvided } = require('~/server/utils');
-const OpenAIClient = require('~/app/clients/OpenAIClient');
+const { isEnabled, isUserProvided, sleep } = require('~/server/utils');
 const { getAzureCredentials } = require('~/utils');
+const { OpenAIClient } = require('~/app');
 
 const initializeClient = async ({
   req,
@@ -141,13 +140,14 @@ const initializeClient = async ({
     clientOptions = Object.assign({ modelOptions }, clientOptions);
     clientOptions.modelOptions.user = req.user.id;
     const options = getLLMConfig(apiKey, clientOptions);
-    const streamRate = clientOptions.streamRate;
-    if (!streamRate) {
+    if (!clientOptions.streamRate) {
       return options;
     }
     options.llmConfig.callbacks = [
       {
-        handleLLMNewToken: createHandleLLMNewToken(streamRate),
+        handleLLMNewToken: async () => {
+          await sleep(clientOptions.streamRate);
+        },
       },
     ];
     return options;

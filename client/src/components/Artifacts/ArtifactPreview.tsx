@@ -46,15 +46,11 @@ export const ArtifactPreview = memo(function ({
     if (!config) {
       return sharedOptions;
     }
-    const _options: typeof sharedOptions = {
+    return {
       ...sharedOptions,
-      bundlerURL: template === 'static' ? config.staticBundlerURL : config.bundlerURL,
+      bundlerURL: config.bundlerURL,
     };
-
-    return _options;
-  }, [config, template]);
-
-  console.log(options);
+  }, [config]);
 
   if (Object.keys(artifactFiles).length === 0) {
     return null;

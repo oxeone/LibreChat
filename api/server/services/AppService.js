@@ -66,7 +66,7 @@ const AppService = async (app) => {
   });
 
   if (config.mcpServers != null) {
-    const mcpManager = getMCPManager();
+    const mcpManager = await getMCPManager();
     await mcpManager.initializeMCP(config.mcpServers, processMCPEnv);
     await mcpManager.mapAvailableTools(availableTools);
   }
@@ -146,7 +146,7 @@ const AppService = async (app) => {
     ...defaultLocals,
     fileConfig: config?.fileConfig,
     secureImageLinks: config?.secureImageLinks,
-    modelSpecs: processModelSpecs(endpoints, config.modelSpecs, interfaceConfig),
+    modelSpecs: processModelSpecs(endpoints, config.modelSpecs),
     ...endpointLocals,
   };
 };

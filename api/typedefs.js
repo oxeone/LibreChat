@@ -771,11 +771,6 @@
  * @typedef {import('@librechat/data-schemas').IMongoFile} MongoFile
  * @memberof typedefs
  */
-/**
- * @exports IBalance
- * @typedef {import('@librechat/data-schemas').IBalance} IBalance
- * @memberof typedefs
- */
 
 /**
  * @exports MongoUser
@@ -825,12 +820,6 @@
 /**
  * @exports EModelEndpoint
  * @typedef {import('librechat-data-provider').EModelEndpoint} EModelEndpoint
- * @memberof typedefs
- */
-
-/**
- * @exports TEndpointOption
- * @typedef {import('librechat-data-provider').TEndpointOption} TEndpointOption
  * @memberof typedefs
  */
 

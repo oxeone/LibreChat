@@ -5,8 +5,7 @@ import {
   SandpackCodeEditor,
   SandpackProvider as StyledProvider,
 } from '@codesandbox/sandpack-react';
-import type { SandpackProviderProps } from '@codesandbox/sandpack-react/unstyled';
-import type { SandpackBundlerFile } from '@codesandbox/sandpack-client';
+import { SandpackProviderProps } from '@codesandbox/sandpack-react/unstyled';
 import type { CodeEditorRef } from '@codesandbox/sandpack-react';
 import type { ArtifactFiles, Artifact } from '~/common';
 import { useEditArtifact, useGetStartupConfig } from '~/data-provider';
@@ -67,7 +66,7 @@ const CodeEditor = ({
       return;
     }
 
-    const currentCode = (sandpack.files['/' + fileKey] as SandpackBundlerFile | undefined)?.code;
+    const currentCode = sandpack.files['/' + fileKey].code;
 
     if (currentCode && artifact.content != null && currentCode.trim() !== artifact.content.trim()) {
       setCurrentCode(currentCode);
@@ -132,9 +131,9 @@ export const ArtifactCodeEditor = memo(function ({
     }
     return {
       ...sharedOptions,
-      bundlerURL: template === 'static' ? config.staticBundlerURL : config.bundlerURL,
+      bundlerURL: config.bundlerURL,
     };
-  }, [config, template]);
+  }, [config]);
 
   if (Object.keys(files).length === 0) {
     return null;

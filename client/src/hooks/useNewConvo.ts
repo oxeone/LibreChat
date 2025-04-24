@@ -28,10 +28,8 @@ import {
 } from '~/utils';
 import { useDeleteFilesMutation, useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import useAssistantListMap from './Assistants/useAssistantListMap';
-import { useResetChatBadges } from './useChatBadges';
 import { usePauseGlobalAudio } from './Audio';
 import { mainTextareaId } from '~/common';
-import { logger } from '~/utils';
 import store from '~/store';
 
 const useNewConvo = (index = 0) => {
@@ -40,8 +38,8 @@ const useNewConvo = (index = 0) => {
   const clearAllConversations = store.useClearConvoState();
   const defaultPreset = useRecoilValue(store.defaultPreset);
   const { setConversation } = store.useCreateConversationAtom(index);
+  const [isTemporary, setIsTemporary] = useRecoilState(store.isTemporary);
   const [files, setFiles] = useRecoilState(store.filesByIndex(index));
-  const saveBadgesState = useRecoilValue<boolean>(store.saveBadgesState);
   const clearAllLatestMessages = store.useClearLatestMessages(`useNewConvo ${index}`);
   const setSubmission = useSetRecoilState<TSubmission | null>(store.submissionByIndex(index));
   const { data: endpointsConfig = {} as TEndpointsConfig } = useGetEndpointsQuery();
@@ -51,7 +49,6 @@ const useNewConvo = (index = 0) => {
   const assistantsListMap = useAssistantListMap();
   const { pauseGlobalAudio } = usePauseGlobalAudio(index);
   const saveDrafts = useRecoilValue<boolean>(store.saveDrafts);
-  const resetBadges = useResetChatBadges();
 
   const { mutateAsync } = useDeleteFilesMutation({
     onSuccess: () => {
@@ -152,7 +149,6 @@ const useNewConvo = (index = 0) => {
         if (!(keepAddedConvos ?? false)) {
           clearAllConversations(true);
         }
-        logger.log('conversation', 'Setting conversation from `useNewConvo`', conversation);
         setConversation(conversation);
         setSubmission({} as TSubmission);
         if (!(keepLatestMessage ?? false)) {
@@ -200,8 +196,8 @@ const useNewConvo = (index = 0) => {
       keepAddedConvos?: boolean;
     } = {}) {
       pauseGlobalAudio();
-      if (!saveBadgesState) {
-        resetBadges();
+      if (isTemporary) {
+        setIsTemporary(false);
       }
 
       const templateConvoId = _template.conversationId ?? '';
@@ -281,7 +277,6 @@ const useNewConvo = (index = 0) => {
       files,
       setFiles,
       mutateAsync,
-      resetBadges,
     ],
   );
 

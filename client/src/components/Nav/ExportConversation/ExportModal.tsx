@@ -1,17 +1,9 @@
 import filenamify from 'filenamify';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import type { TConversation } from 'librechat-data-provider';
 import { OGDialog, Button, Input, Label, Checkbox, Dropdown } from '~/components/ui';
 import OGDialogTemplate from '~/components/ui/OGDialogTemplate';
 import { useLocalize, useExportConversation } from '~/hooks';
-
-const TYPE_OPTIONS = [
-  { value: 'screenshot', label: 'screenshot (.png)' },
-  { value: 'text', label: 'text (.txt)' },
-  { value: 'markdown', label: 'markdown (.md)' },
-  { value: 'json', label: 'json (.json)' },
-  { value: 'csv', label: 'csv (.csv)' },
-];
 
 export default function ExportModal({
   open,
@@ -29,11 +21,19 @@ export default function ExportModal({
   const localize = useLocalize();
 
   const [filename, setFileName] = useState('');
-  const [type, setType] = useState<string>('screenshot');
+  const [type, setType] = useState('Select a file type');
 
   const [includeOptions, setIncludeOptions] = useState<boolean | 'indeterminate'>(true);
   const [exportBranches, setExportBranches] = useState<boolean | 'indeterminate'>(false);
   const [recursive, setRecursive] = useState<boolean | 'indeterminate'>(true);
+
+  const typeOptions = [
+    { value: 'screenshot', label: 'screenshot (.png)' },
+    { value: 'text', label: 'text (.txt)' },
+    { value: 'markdown', label: 'markdown (.md)' },
+    { value: 'json', label: 'json (.json)' },
+    { value: 'csv', label: 'csv (.csv)' },
+  ];
 
   useEffect(() => {
     if (!open && triggerRef && triggerRef.current) {
@@ -49,19 +49,17 @@ export default function ExportModal({
     setRecursive(true);
   }, [conversation?.title, open]);
 
-  const handleTypeChange = useCallback((newType: string) => {
-    const branches = newType === 'json' || newType === 'csv' || newType === 'webpage';
-    const options = newType !== 'csv' && newType !== 'screenshot';
-    setExportBranches(branches);
-    setIncludeOptions(options);
-    setType(newType);
-  }, []);
+  const _setType = (newType: string) => {
+    const exportBranchesSupport = newType === 'json' || newType === 'csv' || newType === 'webpage';
+    const exportOptionsSupport = newType !== 'csv' && newType !== 'screenshot';
 
-  const exportBranchesSupport = useMemo(
-    () => type === 'json' || type === 'csv' || type === 'webpage',
-    [type],
-  );
-  const exportOptionsSupport = useMemo(() => type !== 'csv' && type !== 'screenshot', [type]);
+    setExportBranches(exportBranchesSupport);
+    setIncludeOptions(exportOptionsSupport);
+    setType(newType);
+  };
+
+  const exportBranchesSupport = type === 'json' || type === 'csv' || type === 'webpage';
+  const exportOptionsSupport = type !== 'csv' && type !== 'screenshot';
 
   const { exportConversation } = useExportConversation({
     conversation,
@@ -96,13 +94,7 @@ export default function ExportModal({
                 <Label htmlFor="type" className="text-left text-sm font-medium">
                   {localize('com_nav_export_type')}
                 </Label>
-                <Dropdown
-                  value={type}
-                  onChange={handleTypeChange}
-                  options={TYPE_OPTIONS}
-                  className="z-50"
-                  portal={false}
-                />
+                <Dropdown value={type} onChange={_setType} options={typeOptions} portal={false} />
               </div>
             </div>
             <div className="grid w-full gap-6 sm:grid-cols-2">
@@ -116,6 +108,7 @@ export default function ExportModal({
                       id="includeOptions"
                       disabled={!exportOptionsSupport}
                       checked={includeOptions}
+                      className="focus:ring-opacity-20 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-50 dark:focus:ring-gray-600 dark:focus:ring-opacity-50 dark:focus:ring-offset-0"
                       onCheckedChange={setIncludeOptions}
                     />
                     <label
@@ -138,6 +131,7 @@ export default function ExportModal({
                     id="exportBranches"
                     disabled={!exportBranchesSupport}
                     checked={exportBranches}
+                    className="focus:ring-opacity-20 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-50 dark:focus:ring-gray-600 dark:focus:ring-opacity-50 dark:focus:ring-offset-0"
                     onCheckedChange={setExportBranches}
                   />
                   <label
@@ -156,7 +150,12 @@ export default function ExportModal({
                     {localize('com_nav_export_recursive_or_sequential')}
                   </Label>
                   <div className="flex h-[40px] w-full items-center space-x-3">
-                    <Checkbox id="recursive" checked={recursive} onCheckedChange={setRecursive} />
+                    <Checkbox
+                      id="recursive"
+                      checked={recursive}
+                      className="focus:ring-opacity-20 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-50 dark:focus:ring-gray-600 dark:focus:ring-opacity-50 dark:focus:ring-offset-0"
+                      onCheckedChange={setRecursive}
+                    />
                     <label
                       htmlFor="recursive"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-50"

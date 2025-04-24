@@ -4,28 +4,22 @@ import { useRecoilValue } from 'recoil';
 import { NativeTypes } from 'react-dnd-html5-backend';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Constants,
-  QueryKeys,
-  EModelEndpoint,
   isAgentsEndpoint,
-  isEphemeralAgent,
+  EModelEndpoint,
   AgentCapabilities,
+  QueryKeys,
 } from 'librechat-data-provider';
 import type * as t from 'librechat-data-provider';
 import type { DropTargetMonitor } from 'react-dnd';
 import useFileHandling from './useFileHandling';
-import store, { ephemeralAgentByConvoId } from '~/store';
+import store from '~/store';
 
 export default function useDragHelpers() {
   const queryClient = useQueryClient();
+  const { handleFiles } = useFileHandling();
   const [showModal, setShowModal] = useState(false);
   const [draggedFiles, setDraggedFiles] = useState<File[]>([]);
   const conversation = useRecoilValue(store.conversationByIndex(0)) || undefined;
-  const key = useMemo(
-    () => conversation?.conversationId ?? Constants.NEW_CONVO,
-    [conversation?.conversationId],
-  );
-  const ephemeralAgent = useRecoilValue(ephemeralAgentByConvoId(key));
 
   const handleOptionSelect = (toolResource: string | undefined) => {
     handleFiles(draggedFiles, toolResource);
@@ -34,15 +28,9 @@ export default function useDragHelpers() {
   };
 
   const isAgents = useMemo(
-    () =>
-      isAgentsEndpoint(conversation?.endpoint) ||
-      isEphemeralAgent(conversation?.endpoint, ephemeralAgent),
-    [conversation?.endpoint, ephemeralAgent],
+    () => isAgentsEndpoint(conversation?.endpoint),
+    [conversation?.endpoint],
   );
-
-  const { handleFiles } = useFileHandling({
-    overrideEndpoint: isAgents ? EModelEndpoint.agents : undefined,
-  });
 
   const [{ canDrop, isOver }, drop] = useDrop(
     () => ({
@@ -73,7 +61,7 @@ export default function useDragHelpers() {
         canDrop: monitor.canDrop(),
       }),
     }),
-    [handleFiles],
+    [],
   );
 
   return {

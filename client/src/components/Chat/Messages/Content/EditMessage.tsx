@@ -60,7 +60,7 @@ const EditMessage = ({
           conversationId,
         },
         {
-          isResubmission: true,
+          resubmitFiles: true,
         },
       );
 

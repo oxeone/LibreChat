@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState, memo, useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   Row,
@@ -24,13 +23,11 @@ import {
   TableHead,
   TableHeader,
   AnimatedSearchInput,
-  Skeleton,
 } from './';
 import { TrashIcon, Spinner } from '~/components/svg';
 import { useLocalize, useMediaQuery } from '~/hooks';
-import { LocalizeFunction } from '~/common';
 import { cn } from '~/utils';
-import store from '~/store';
+import { LocalizeFunction } from '~/common';
 
 type TableColumn<TData, TValue> = ColumnDef<TData, TValue> & {
   meta?: {
@@ -80,7 +77,6 @@ interface DataTableProps<TData, TValue> {
   showCheckboxes?: boolean;
   onFilterChange?: (value: string) => void;
   filterValue?: string;
-  isLoading?: boolean;
 }
 
 const TableRowComponent = <TData, TValue>({
@@ -107,11 +103,17 @@ const TableRowComponent = <TData, TValue>({
   return (
     <TableRow
       data-state={row.getIsSelected() ? 'selected' : undefined}
-      className="motion-safe:animate-fadeIn border-b border-border-light transition-all duration-300 ease-out hover:bg-surface-secondary"
+      className={`
+        motion-safe:animate-fadeIn border-b
+        border-border-light transition-all duration-300
+        ease-out
+        hover:bg-surface-secondary
+        ${isSearching ? 'opacity-50' : 'opacity-100'}
+        ${isSearching ? 'scale-98' : 'scale-100'}
+      `}
       style={{
         animationDelay: `${index * 20}ms`,
         transform: `translateY(${isSearching ? '4px' : '0'})`,
-        opacity: isSearching ? 0.5 : 1,
       }}
     >
       {row.getVisibleCells().map((cell) => {
@@ -130,7 +132,12 @@ const TableRowComponent = <TData, TValue>({
         return (
           <TableCell
             key={cell.id}
-            className="w-0 max-w-0 px-2 py-1 align-middle text-xs transition-all duration-300 sm:px-4 sm:py-2 sm:text-sm"
+            className={`
+              w-0 max-w-0 px-2 py-1 align-middle text-xs
+              transition-all duration-300 sm:px-4
+              sm:py-2 sm:text-sm
+              ${isSearching ? 'blur-[0.3px]' : 'blur-0'}
+            `}
             style={getColumnStyle(
               cell.column.columnDef as TableColumn<TData, TValue>,
               isSmallScreen,
@@ -171,7 +178,7 @@ const DeleteButton = memo(
     isDeleting: boolean;
     disabled: boolean;
     isSmallScreen: boolean;
-    localize: LocalizeFunction;
+    localize:LocalizeFunction;
   }) => {
     if (!onDelete) {
       return null;
@@ -210,14 +217,12 @@ export default function DataTable<TData, TValue>({
   showCheckboxes = true,
   onFilterChange,
   filterValue,
-  isLoading,
 }: DataTableProps<TData, TValue>) {
   const localize = useLocalize();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const search = useRecoilValue(store.search);
   const [isDeleting, setIsDeleting] = useState(false);
+
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [sorting, setSorting] = useState<SortingState>(defaultSort);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -331,40 +336,16 @@ export default function DataTable<TData, TValue>({
       const itemsToDelete = table.getFilteredSelectedRowModel().rows.map((r) => r.original);
       await onDelete(itemsToDelete);
       setRowSelection({});
+      // await fetchNextPage?.({ pageParam: lastPage?.nextCursor });
     } finally {
       setIsDeleting(false);
     }
   }, [onDelete, table]);
 
-  const getRandomWidth = () => Math.floor(Math.random() * (410 - 170 + 1)) + 170;
-
-  const skeletons = Array.from({ length: 13 }, (_, index) => {
-    const randomWidth = getRandomWidth();
-    const firstDataColumnIndex = tableColumns[0]?.id === 'select' ? 1 : 0;
-
-    return (
-      <TableRow key={index} className="motion-safe:animate-fadeIn border-b border-border-light">
-        {tableColumns.map((column, columnIndex) => {
-          const style = getColumnStyle(column as TableColumn<TData, TValue>, isSmallScreen);
-          const isFirstDataColumn = columnIndex === firstDataColumnIndex;
-
-          return (
-            <TableCell key={column.id} className="px-2 py-1 sm:px-4 sm:py-2" style={style}>
-              <Skeleton
-                className="h-6"
-                style={isFirstDataColumn ? { width: `${randomWidth}px` } : { width: '100%' }}
-              />
-            </TableCell>
-          );
-        })}
-      </TableRow>
-    );
-  });
-
   return (
     <div className={cn('flex h-full flex-col gap-4', className)}>
       {/* Table controls */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2 py-2 sm:gap-4 sm:py-4">
         {enableRowSelection && showCheckboxes && (
           <DeleteButton
             onDelete={handleDelete}
@@ -374,7 +355,7 @@ export default function DataTable<TData, TValue>({
             localize={localize}
           />
         )}
-        {filterColumn !== undefined && table.getColumn(filterColumn) && search.enabled && (
+        {filterColumn !== undefined && table.getColumn(filterColumn) && (
           <div className="relative flex-1">
             <AnimatedSearchInput
               value={searchTerm}
@@ -429,8 +410,6 @@ export default function DataTable<TData, TValue>({
                 <td style={{ height: `${paddingTop}px` }} />
               </tr>
             )}
-
-            {isLoading && skeletons}
 
             {virtualRows.map((virtualRow) => {
               const row = rows[virtualRow.index];

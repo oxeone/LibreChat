@@ -2,21 +2,22 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const {
   SystemRoles,
-  Permissions,
-  roleDefaults,
   PermissionTypes,
+  roleDefaults,
+  Permissions,
 } = require('librechat-data-provider');
-const { Role, getRoleByName, updateAccessPermissions, initializeRoles } = require('~/models/Role');
+const { updateAccessPermissions, initializeRoles } = require('~/models/Role');
 const getLogStores = require('~/cache/getLogStores');
+const { Role } = require('~/models/Role');
 
 // Mock the cache
-jest.mock('~/cache/getLogStores', () =>
-  jest.fn().mockReturnValue({
+jest.mock('~/cache/getLogStores', () => {
+  return jest.fn().mockReturnValue({
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
-  }),
-);
+  });
+});
 
 let mongoServer;
 
@@ -40,12 +41,10 @@ describe('updateAccessPermissions', () => {
   it('should update permissions when changes are needed', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          CREATE: true,
-          USE: true,
-          SHARED_GLOBAL: false,
-        },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
       },
     }).save();
 
@@ -57,8 +56,8 @@ describe('updateAccessPermissions', () => {
       },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: true,
       SHARED_GLOBAL: true,
@@ -68,12 +67,10 @@ describe('updateAccessPermissions', () => {
   it('should not update permissions when no changes are needed', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          CREATE: true,
-          USE: true,
-          SHARED_GLOBAL: false,
-        },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
       },
     }).save();
 
@@ -85,8 +82,8 @@ describe('updateAccessPermissions', () => {
       },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: true,
       SHARED_GLOBAL: false,
@@ -95,8 +92,11 @@ describe('updateAccessPermissions', () => {
 
   it('should handle non-existent roles', async () => {
     await updateAccessPermissions('NON_EXISTENT_ROLE', {
-      [PermissionTypes.PROMPTS]: { CREATE: true },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+      },
     });
+
     const role = await Role.findOne({ name: 'NON_EXISTENT_ROLE' });
     expect(role).toBeNull();
   });
@@ -104,21 +104,21 @@ describe('updateAccessPermissions', () => {
   it('should update only specified permissions', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          CREATE: true,
-          USE: true,
-          SHARED_GLOBAL: false,
-        },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
       },
     }).save();
 
     await updateAccessPermissions(SystemRoles.USER, {
-      [PermissionTypes.PROMPTS]: { SHARED_GLOBAL: true },
+      [PermissionTypes.PROMPTS]: {
+        SHARED_GLOBAL: true,
+      },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: true,
       SHARED_GLOBAL: true,
@@ -128,21 +128,21 @@ describe('updateAccessPermissions', () => {
   it('should handle partial updates', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          CREATE: true,
-          USE: true,
-          SHARED_GLOBAL: false,
-        },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
       },
     }).save();
 
     await updateAccessPermissions(SystemRoles.USER, {
-      [PermissionTypes.PROMPTS]: { USE: false },
+      [PermissionTypes.PROMPTS]: {
+        USE: false,
+      },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: false,
       SHARED_GLOBAL: false,
@@ -152,9 +152,13 @@ describe('updateAccessPermissions', () => {
   it('should update multiple permission types at once', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: { CREATE: true, USE: true, SHARED_GLOBAL: false },
-        [PermissionTypes.BOOKMARKS]: { USE: true },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
+      },
+      [PermissionTypes.BOOKMARKS]: {
+        USE: true,
       },
     }).save();
 
@@ -163,20 +167,24 @@ describe('updateAccessPermissions', () => {
       [PermissionTypes.BOOKMARKS]: { USE: false },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: false,
       SHARED_GLOBAL: true,
     });
-    expect(updatedRole.permissions[PermissionTypes.BOOKMARKS]).toEqual({ USE: false });
+    expect(updatedRole[PermissionTypes.BOOKMARKS]).toEqual({
+      USE: false,
+    });
   });
 
   it('should handle updates for a single permission type', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: { CREATE: true, USE: true, SHARED_GLOBAL: false },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
       },
     }).save();
 
@@ -184,8 +192,8 @@ describe('updateAccessPermissions', () => {
       [PermissionTypes.PROMPTS]: { USE: false, SHARED_GLOBAL: true },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: false,
       SHARED_GLOBAL: true,
@@ -195,25 +203,33 @@ describe('updateAccessPermissions', () => {
   it('should update MULTI_CONVO permissions', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.MULTI_CONVO]: { USE: false },
+      [PermissionTypes.MULTI_CONVO]: {
+        USE: false,
       },
     }).save();
 
     await updateAccessPermissions(SystemRoles.USER, {
-      [PermissionTypes.MULTI_CONVO]: { USE: true },
+      [PermissionTypes.MULTI_CONVO]: {
+        USE: true,
+      },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.MULTI_CONVO]).toEqual({ USE: true });
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.MULTI_CONVO]).toEqual({
+      USE: true,
+    });
   });
 
   it('should update MULTI_CONVO permissions along with other permission types', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: { CREATE: true, USE: true, SHARED_GLOBAL: false },
-        [PermissionTypes.MULTI_CONVO]: { USE: false },
+      [PermissionTypes.PROMPTS]: {
+        CREATE: true,
+        USE: true,
+        SHARED_GLOBAL: false,
+      },
+      [PermissionTypes.MULTI_CONVO]: {
+        USE: false,
       },
     }).save();
 
@@ -222,29 +238,35 @@ describe('updateAccessPermissions', () => {
       [PermissionTypes.MULTI_CONVO]: { USE: true },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.PROMPTS]).toEqual({
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.PROMPTS]).toEqual({
       CREATE: true,
       USE: true,
       SHARED_GLOBAL: true,
     });
-    expect(updatedRole.permissions[PermissionTypes.MULTI_CONVO]).toEqual({ USE: true });
+    expect(updatedRole[PermissionTypes.MULTI_CONVO]).toEqual({
+      USE: true,
+    });
   });
 
   it('should not update MULTI_CONVO permissions when no changes are needed', async () => {
     await new Role({
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.MULTI_CONVO]: { USE: true },
+      [PermissionTypes.MULTI_CONVO]: {
+        USE: true,
       },
     }).save();
 
     await updateAccessPermissions(SystemRoles.USER, {
-      [PermissionTypes.MULTI_CONVO]: { USE: true },
+      [PermissionTypes.MULTI_CONVO]: {
+        USE: true,
+      },
     });
 
-    const updatedRole = await getRoleByName(SystemRoles.USER);
-    expect(updatedRole.permissions[PermissionTypes.MULTI_CONVO]).toEqual({ USE: true });
+    const updatedRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+    expect(updatedRole[PermissionTypes.MULTI_CONVO]).toEqual({
+      USE: true,
+    });
   });
 });
 
@@ -256,69 +278,65 @@ describe('initializeRoles', () => {
   it('should create default roles if they do not exist', async () => {
     await initializeRoles();
 
-    const adminRole = await getRoleByName(SystemRoles.ADMIN);
-    const userRole = await getRoleByName(SystemRoles.USER);
+    const adminRole = await Role.findOne({ name: SystemRoles.ADMIN }).lean();
+    const userRole = await Role.findOne({ name: SystemRoles.USER }).lean();
 
     expect(adminRole).toBeTruthy();
     expect(userRole).toBeTruthy();
 
-    // Check if all permission types exist in the permissions field
+    // Check if all permission types exist
     Object.values(PermissionTypes).forEach((permType) => {
-      expect(adminRole.permissions[permType]).toBeDefined();
-      expect(userRole.permissions[permType]).toBeDefined();
+      expect(adminRole[permType]).toBeDefined();
+      expect(userRole[permType]).toBeDefined();
     });
 
-    // Example: Check default values for ADMIN role
-    expect(adminRole.permissions[PermissionTypes.PROMPTS].SHARED_GLOBAL).toBe(true);
-    expect(adminRole.permissions[PermissionTypes.BOOKMARKS].USE).toBe(true);
-    expect(adminRole.permissions[PermissionTypes.AGENTS].CREATE).toBe(true);
+    // Check if permissions match defaults (example for ADMIN role)
+    expect(adminRole[PermissionTypes.PROMPTS].SHARED_GLOBAL).toBe(true);
+    expect(adminRole[PermissionTypes.BOOKMARKS].USE).toBe(true);
+    expect(adminRole[PermissionTypes.AGENTS].CREATE).toBe(true);
   });
 
   it('should not modify existing permissions for existing roles', async () => {
     const customUserRole = {
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          [Permissions.USE]: false,
-          [Permissions.CREATE]: true,
-          [Permissions.SHARED_GLOBAL]: true,
-        },
-        [PermissionTypes.BOOKMARKS]: { [Permissions.USE]: false },
+      [PermissionTypes.PROMPTS]: {
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: true,
+        [Permissions.SHARED_GLOBAL]: true,
+      },
+      [PermissionTypes.BOOKMARKS]: {
+        [Permissions.USE]: false,
       },
     };
 
     await new Role(customUserRole).save();
+
     await initializeRoles();
 
-    const userRole = await getRoleByName(SystemRoles.USER);
-    expect(userRole.permissions[PermissionTypes.PROMPTS]).toEqual(
-      customUserRole.permissions[PermissionTypes.PROMPTS],
-    );
-    expect(userRole.permissions[PermissionTypes.BOOKMARKS]).toEqual(
-      customUserRole.permissions[PermissionTypes.BOOKMARKS],
-    );
-    expect(userRole.permissions[PermissionTypes.AGENTS]).toBeDefined();
+    const userRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+
+    expect(userRole[PermissionTypes.PROMPTS]).toEqual(customUserRole[PermissionTypes.PROMPTS]);
+    expect(userRole[PermissionTypes.BOOKMARKS]).toEqual(customUserRole[PermissionTypes.BOOKMARKS]);
+    expect(userRole[PermissionTypes.AGENTS]).toBeDefined();
   });
 
   it('should add new permission types to existing roles', async () => {
     const partialUserRole = {
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]:
-          roleDefaults[SystemRoles.USER].permissions[PermissionTypes.PROMPTS],
-        [PermissionTypes.BOOKMARKS]:
-          roleDefaults[SystemRoles.USER].permissions[PermissionTypes.BOOKMARKS],
-      },
+      [PermissionTypes.PROMPTS]: roleDefaults[SystemRoles.USER][PermissionTypes.PROMPTS],
+      [PermissionTypes.BOOKMARKS]: roleDefaults[SystemRoles.USER][PermissionTypes.BOOKMARKS],
     };
 
     await new Role(partialUserRole).save();
+
     await initializeRoles();
 
-    const userRole = await getRoleByName(SystemRoles.USER);
-    expect(userRole.permissions[PermissionTypes.AGENTS]).toBeDefined();
-    expect(userRole.permissions[PermissionTypes.AGENTS].CREATE).toBeDefined();
-    expect(userRole.permissions[PermissionTypes.AGENTS].USE).toBeDefined();
-    expect(userRole.permissions[PermissionTypes.AGENTS].SHARED_GLOBAL).toBeDefined();
+    const userRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+
+    expect(userRole[PermissionTypes.AGENTS]).toBeDefined();
+    expect(userRole[PermissionTypes.AGENTS].CREATE).toBeDefined();
+    expect(userRole[PermissionTypes.AGENTS].USE).toBeDefined();
+    expect(userRole[PermissionTypes.AGENTS].SHARED_GLOBAL).toBeDefined();
   });
 
   it('should handle multiple runs without duplicating or modifying data', async () => {
@@ -331,73 +349,72 @@ describe('initializeRoles', () => {
     expect(adminRoles).toHaveLength(1);
     expect(userRoles).toHaveLength(1);
 
-    const adminPerms = adminRoles[0].toObject().permissions;
-    const userPerms = userRoles[0].toObject().permissions;
+    const adminRole = adminRoles[0].toObject();
+    const userRole = userRoles[0].toObject();
+
+    // Check if all permission types exist
     Object.values(PermissionTypes).forEach((permType) => {
-      expect(adminPerms[permType]).toBeDefined();
-      expect(userPerms[permType]).toBeDefined();
+      expect(adminRole[permType]).toBeDefined();
+      expect(userRole[permType]).toBeDefined();
     });
   });
 
   it('should update roles with missing permission types from roleDefaults', async () => {
     const partialAdminRole = {
       name: SystemRoles.ADMIN,
-      permissions: {
-        [PermissionTypes.PROMPTS]: {
-          [Permissions.USE]: false,
-          [Permissions.CREATE]: false,
-          [Permissions.SHARED_GLOBAL]: false,
-        },
-        [PermissionTypes.BOOKMARKS]:
-          roleDefaults[SystemRoles.ADMIN].permissions[PermissionTypes.BOOKMARKS],
+      [PermissionTypes.PROMPTS]: {
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
+        [Permissions.SHARED_GLOBAL]: false,
       },
+      [PermissionTypes.BOOKMARKS]: roleDefaults[SystemRoles.ADMIN][PermissionTypes.BOOKMARKS],
     };
 
     await new Role(partialAdminRole).save();
+
     await initializeRoles();
 
-    const adminRole = await getRoleByName(SystemRoles.ADMIN);
-    expect(adminRole.permissions[PermissionTypes.PROMPTS]).toEqual(
-      partialAdminRole.permissions[PermissionTypes.PROMPTS],
-    );
-    expect(adminRole.permissions[PermissionTypes.AGENTS]).toBeDefined();
-    expect(adminRole.permissions[PermissionTypes.AGENTS].CREATE).toBeDefined();
-    expect(adminRole.permissions[PermissionTypes.AGENTS].USE).toBeDefined();
-    expect(adminRole.permissions[PermissionTypes.AGENTS].SHARED_GLOBAL).toBeDefined();
+    const adminRole = await Role.findOne({ name: SystemRoles.ADMIN }).lean();
+
+    expect(adminRole[PermissionTypes.PROMPTS]).toEqual(partialAdminRole[PermissionTypes.PROMPTS]);
+    expect(adminRole[PermissionTypes.AGENTS]).toBeDefined();
+    expect(adminRole[PermissionTypes.AGENTS].CREATE).toBeDefined();
+    expect(adminRole[PermissionTypes.AGENTS].USE).toBeDefined();
+    expect(adminRole[PermissionTypes.AGENTS].SHARED_GLOBAL).toBeDefined();
   });
 
   it('should include MULTI_CONVO permissions when creating default roles', async () => {
     await initializeRoles();
 
-    const adminRole = await getRoleByName(SystemRoles.ADMIN);
-    const userRole = await getRoleByName(SystemRoles.USER);
+    const adminRole = await Role.findOne({ name: SystemRoles.ADMIN }).lean();
+    const userRole = await Role.findOne({ name: SystemRoles.USER }).lean();
 
-    expect(adminRole.permissions[PermissionTypes.MULTI_CONVO]).toBeDefined();
-    expect(userRole.permissions[PermissionTypes.MULTI_CONVO]).toBeDefined();
-    expect(adminRole.permissions[PermissionTypes.MULTI_CONVO].USE).toBe(
-      roleDefaults[SystemRoles.ADMIN].permissions[PermissionTypes.MULTI_CONVO].USE,
+    expect(adminRole[PermissionTypes.MULTI_CONVO]).toBeDefined();
+    expect(userRole[PermissionTypes.MULTI_CONVO]).toBeDefined();
+
+    // Check if MULTI_CONVO permissions match defaults
+    expect(adminRole[PermissionTypes.MULTI_CONVO].USE).toBe(
+      roleDefaults[SystemRoles.ADMIN][PermissionTypes.MULTI_CONVO].USE,
     );
-    expect(userRole.permissions[PermissionTypes.MULTI_CONVO].USE).toBe(
-      roleDefaults[SystemRoles.USER].permissions[PermissionTypes.MULTI_CONVO].USE,
+    expect(userRole[PermissionTypes.MULTI_CONVO].USE).toBe(
+      roleDefaults[SystemRoles.USER][PermissionTypes.MULTI_CONVO].USE,
     );
   });
 
   it('should add MULTI_CONVO permissions to existing roles without them', async () => {
     const partialUserRole = {
       name: SystemRoles.USER,
-      permissions: {
-        [PermissionTypes.PROMPTS]:
-          roleDefaults[SystemRoles.USER].permissions[PermissionTypes.PROMPTS],
-        [PermissionTypes.BOOKMARKS]:
-          roleDefaults[SystemRoles.USER].permissions[PermissionTypes.BOOKMARKS],
-      },
+      [PermissionTypes.PROMPTS]: roleDefaults[SystemRoles.USER][PermissionTypes.PROMPTS],
+      [PermissionTypes.BOOKMARKS]: roleDefaults[SystemRoles.USER][PermissionTypes.BOOKMARKS],
     };
 
     await new Role(partialUserRole).save();
+
     await initializeRoles();
 
-    const userRole = await getRoleByName(SystemRoles.USER);
-    expect(userRole.permissions[PermissionTypes.MULTI_CONVO]).toBeDefined();
-    expect(userRole.permissions[PermissionTypes.MULTI_CONVO].USE).toBeDefined();
+    const userRole = await Role.findOne({ name: SystemRoles.USER }).lean();
+
+    expect(userRole[PermissionTypes.MULTI_CONVO]).toBeDefined();
+    expect(userRole[PermissionTypes.MULTI_CONVO].USE).toBeDefined();
   });
 });

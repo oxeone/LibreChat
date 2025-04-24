@@ -76,9 +76,6 @@ export const useUploadFileMutation = (
             ...prevResources,
             [tool_resource]: prevResource,
           };
-          if (!agent.tools?.includes(tool_resource)) {
-            update['tools'] = [...(agent.tools ?? []), tool_resource];
-          }
           return {
             ...agent,
             ...update,
