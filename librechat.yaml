@@ -87,6 +87,9 @@ modelSpecs:
     - chatGPTBrowser
     - anthropic
     - MarginalAgent
+    - deepseek
+    - cohere
+    - mistral
   enforce: false
   prioritize: false
   list:
