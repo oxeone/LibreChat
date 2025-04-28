@@ -35,23 +35,6 @@ endpoints:
     titleModel: "gpt-3.5-turbo"
 
   custom:
-    # Marginal Agent Custom AI webhook endpoint
-    - name: "MarginalAgent - test"
-      apiKey: "1234"
-      baseURL: "https://margial.app.n8n.cloud/webhook-test/c9ba4f9f-9bfd-4ab5-bb2d-54ec9631f63e"
-      directEndpoint: false
-      models:
-        default:
-          - "firma"
-        fetch: false
-      titleConvo: false
-      summarize: false
-      forcePrompt: true
-      stream: false
-      disableHistory: true
-      modelDisplayLabel: "Marginal Firma Agent"
-      iconURL: "/assets/logo.svg"
-
     # Preplexity
     # Model list: https://docs.perplexity.ai/docs/model-cards
     - name: "Perplexity"
@@ -91,7 +74,7 @@ modelSpecs:
     - cohere
     - mistral
   enforce: false
-  prioritize: true
+  prioritize: false
   list:
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
@@ -135,7 +118,6 @@ modelSpecs:
           - Drive
           - Analytics
           - Tools"  
-    # Perplexity Models
     - name: "sonar-small-chat"
       label: "Perplexity - Sonar Small Chat"
       description: "Lightweight model optimized for fast, real-time responses."
