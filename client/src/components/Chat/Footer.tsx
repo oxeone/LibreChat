@@ -54,7 +54,6 @@ export default function Footer({ className }: { className?: string }) {
     <React.Fragment key={`main-content-part-${index}`}>
       <ReactMarkdown
         components={{
-
           a: ({ node: _n, href, children, ...otherProps }) => {
             return (
               <a
