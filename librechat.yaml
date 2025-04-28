@@ -34,13 +34,6 @@ endpoints:
     titleConvo: true
     titleModel: "gpt-3.5-turbo"
 
-  perplexity:
-    apiKey: "${PERPLEXITY_API_KEY}"
-    baseURL: "https://api.perplexity.ai/"
-    models:
-      default: ["sonar"]
-      fetch: false
-
   custom:
     # Marginal Agent Custom AI webhook endpoint
     - name: "MarginalAgent - test"
