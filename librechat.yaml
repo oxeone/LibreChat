@@ -13,6 +13,8 @@ interface:
   bookmarks: true
   multiConvo: true
   agents: true
+  agentBuilder: true
+  endpointsMenu: true
   runCode: false
   autoScroll: true
   autoScrollDelay: 1000
@@ -510,7 +512,7 @@ endpoints:
       forcePrompt: false
       modelDisplayLabel: "OpenRouter"
 
-       # Preplexity
+    # Preplexity
     # Model list: https://docs.perplexity.ai/docs/model-cards
     - name: "Perplexity"
       apiKey: "${PERPLEXITY_API_KEY}"
@@ -547,7 +549,7 @@ modelSpecs:
     - anthropic
     - MarginalAgent
   enforce: false
-  prioritize: true
+  prioritize: false
   list:
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
