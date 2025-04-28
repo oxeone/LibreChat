@@ -91,7 +91,7 @@ modelSpecs:
     - cohere
     - mistral
   enforce: false
-  prioritize: false
+  prioritize: true
   list:
     - name: "GPT-4o"
       label: "OpenAI - GPT-4 Omni"
