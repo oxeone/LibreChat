@@ -5,7 +5,7 @@ const { logger } = require('~/config');
 /**
  * Værktøj til MMCP API.
  */
-class MAnalytics extends Tool {
+class MMCP extends Tool {
   static lc_name() {
     return 'MMCP';
   }
