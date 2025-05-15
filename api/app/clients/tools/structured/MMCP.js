@@ -14,7 +14,17 @@ class MMCP extends Tool {
     super(fields);
     this.name = 'm_mcp';
     this.description = 'Et værktøj til at indsamle virksomhedsoplysninger og foreslå relevante handlinger baseret på klientnavn eller URL.';
-    this.description_for_model = `Dette værktøj indsamler oplysninger om en virksomhed baseret på et angivet klientnavn eller en URL. Det returnerer følgende JSON-struktur:
+    this.description_for_model = `Dette værktøj indsamler oplysninger om en virksomhed baseret på et angivet klientnavn eller en URL. 
+    Du kan bruge følgende handlinger til at få svar fra vores MCP API:
+    actions:
+    website - Crawl Website and return the data in the message.
+    serp_paa - Google People Also Asked (PAA)
+    serp_adresult - Get Google Ads Results from search.
+    monday_boards - Find bord titles in Monday.com
+    trustpilot_score - Find the Trustpilot score with the tool and return it in the message in danish.
+
+
+    Det arbejder med følgende JSON-struktur:
       {
         "message": "Beskrivelse af brugerens hensigt og de kaldte værktøjer.",
         "place_id": "Google Place ID for virksomheden",
@@ -34,7 +44,7 @@ class MMCP extends Tool {
 
   // eslint-disable-next-line no-unused-vars
   async _call({ query }, _runManager) {
-    const apiUrl = 'https://margial.app.n8n.cloud/webhook/e9df69a4-1e32-47ee-9fcc-35b479b34ba2';
+    const apiUrl = 'https://margial.app.n8n.cloud/webhook-test/2fa8d53e-0fbd-4fc8-a26a-958486e3aaec';
 
     try {
       const response = await fetch(apiUrl, {
@@ -57,8 +67,8 @@ class MMCP extends Tool {
 
       return data.output;
     } catch (error) {
-      logger.error('MAnalytics API-anmodning mislykkedes', error);
-      return `Fejl i MAnalytics: ${error.message}`;
+      logger.error('MMCP API-anmodning mislykkedes', error);
+      return `Fejl i MMCP: ${error.message}`;
     }
   }
 }
