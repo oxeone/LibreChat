@@ -16,6 +16,7 @@ const CVRSearch = require('./structured/CVRSearch');
 const MAnalytics = require('./structured/MAnalytics');
 const MDrive = require('./structured/MDrive');
 const MActiveCampaign = require('./structured/MActiveCampaign');
+const MMCP = require('./structured/MMCP');
 
 /** @type {Record<string, TPlugin | undefined>} */
 const manifestToolMap = {};
@@ -50,4 +51,5 @@ module.exports = {
   MDrive,
   MActiveCampaign,
   createOpenAIImageTools,
+  MMCP,
 };

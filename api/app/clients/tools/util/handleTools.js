@@ -22,6 +22,7 @@ const {
   MAnalytics,
   MDrive,
   MActiveCampaign,
+  MMCP,
   createOpenAIImageTools,
 } = require('../');
 const { primeFiles: primeCodeFiles } = require('~/server/services/Files/Code/process');
@@ -163,6 +164,7 @@ const loadTools = async ({
     m_analytics: MAnalytics,
     m_drive: MDrive,
     m_activecampaign: MActiveCampaign,
+    m_mcp: MMCP,
   };
 
   
