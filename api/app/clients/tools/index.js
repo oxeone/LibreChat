@@ -15,7 +15,6 @@ const TavilySearchResults = require('./structured/TavilySearchResults');
 const CVRSearch = require('./structured/CVRSearch');
 const MAnalytics = require('./structured/MAnalytics');
 const MDrive = require('./structured/MDrive');
-const TDrive = require('./structured/TDrive');
 const MActiveCampaign = require('./structured/MActiveCampaign');
 const MMCP = require('./structured/MMCP');
 
@@ -50,7 +49,6 @@ module.exports = {
   CVRSearch,
   MAnalytics,
   MDrive,
-  TDrive,
   MActiveCampaign,
   createOpenAIImageTools,
   MMCP,
