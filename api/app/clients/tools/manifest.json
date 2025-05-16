@@ -16,6 +16,14 @@
     "authConfig": []
   },
   {
+    "name": "Test - Drive",
+    "pluginKey": "t_drive",
+    "description": "Google Drive actions agent.",
+    "icon": "/assets/logo.svg",
+    "isAuthRequired": "false",
+    "authConfig": []
+  },
+  {
     "name": "Marginal - Drive",
     "pluginKey": "m_drive",
     "description": "Google Drive actions agent.",
