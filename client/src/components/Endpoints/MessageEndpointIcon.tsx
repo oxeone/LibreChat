@@ -34,7 +34,10 @@ function getOpenAIColor(_model: string | null | undefined) {
 function getGoogleIcon(model: string | null | undefined, size: number) {
   if (model?.toLowerCase().includes('code') === true) {
     return <CodeyIcon size={size * 0.75} />;
-  } else if (/gemini|learnlm|gemma/.test(model?.toLowerCase() ?? '')) {
+  } else if (
+    model?.toLowerCase().includes('gemini') === true ||
+    model?.toLowerCase().includes('learnlm') === true
+  ) {
     return <GeminiIcon size={size * 0.7} />;
   } else {
     return <PaLMIcon size={size * 0.7} />;
@@ -49,8 +52,6 @@ function getGoogleModelName(model: string | null | undefined) {
     model?.toLowerCase().includes('learnlm') === true
   ) {
     return 'Gemini';
-  } else if (model?.toLowerCase().includes('gemma') === true) {
-    return 'Gemma';
   } else {
     return 'PaLM2';
   }

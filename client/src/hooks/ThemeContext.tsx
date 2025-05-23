@@ -58,14 +58,10 @@ export const ThemeProvider = ({ initialTheme, children }) => {
     if (fontSize == null) {
       setFontSize('text-base');
       applyFontSize('text-base');
-      localStorage.setItem('fontSize', JSON.stringify('text-base'));
+      localStorage.setItem('fontSize', 'text-base');
       return;
     }
-    try {
-      applyFontSize(JSON.parse(fontSize));
-    } catch (error) {
-      console.log(error);
-    }
+    applyFontSize(JSON.parse(fontSize));
     // Reason: This effect should only run once, and `setFontSize` is a stable function
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

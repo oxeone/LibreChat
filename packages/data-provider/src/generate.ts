@@ -358,7 +358,7 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
         // continue;
       }
       setting.includeInput =
-        setting.type === SettingTypes.Number ? (setting.includeInput ?? true) : false; // Default to true if type is number
+        setting.type === SettingTypes.Number ? setting.includeInput ?? true : false; // Default to true if type is number
     }
 
     if (setting.component === ComponentTypes.Slider && setting.type === SettingTypes.Number) {
@@ -445,8 +445,7 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
 
     // Validate optionType and conversation schema
     if (setting.optionType !== OptionTypes.Custom) {
-      const conversationSchema =
-        tConversationSchema.shape[setting.key as keyof Omit<TConversation, 'disableParams'>];
+      const conversationSchema = tConversationSchema.shape[setting.key as keyof TConversation];
       if (!conversationSchema) {
         errors.push({
           code: ZodIssueCode.custom,
@@ -467,7 +466,7 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
     }
 
     /* Default value checks */
-    if (setting.type === SettingTypes.Number && isNaN(setting.default as number)  && setting.default != null) {
+    if (setting.type === SettingTypes.Number && isNaN(setting.default as number)) {
       errors.push({
         code: ZodIssueCode.custom,
         message: `Invalid default value for setting ${setting.key}. Must be a number.`,
@@ -475,7 +474,7 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
       });
     }
 
-    if (setting.type === SettingTypes.Boolean && typeof setting.default !== 'boolean' && setting.default != null) {
+    if (setting.type === SettingTypes.Boolean && typeof setting.default !== 'boolean') {
       errors.push({
         code: ZodIssueCode.custom,
         message: `Invalid default value for setting ${setting.key}. Must be a boolean.`,
@@ -485,7 +484,7 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
 
     if (
       (setting.type === SettingTypes.String || setting.type === SettingTypes.Enum) &&
-      typeof setting.default !== 'string' && setting.default != null
+      typeof setting.default !== 'string'
     ) {
       errors.push({
         code: ZodIssueCode.custom,

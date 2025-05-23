@@ -12,7 +12,6 @@ const { initializeFirebase } = require('./Files/Firebase/initialize');
 const loadCustomConfig = require('./Config/loadCustomConfig');
 const handleRateLimits = require('./Config/handleRateLimits');
 const { loadDefaultInterface } = require('./start/interface');
-const { loadTurnstileConfig } = require('./start/turnstile');
 const { azureConfigSetup } = require('./start/azureOpenAI');
 const { processModelSpecs } = require('./start/modelSpecs');
 const { initializeS3 } = require('./Files/S3/initialize');
@@ -24,6 +23,7 @@ const { getMCPManager } = require('~/config');
 const paths = require('~/config/paths');
 
 /**
+ *
  * Loads custom config and initializes app-wide variables.
  * @function AppService
  * @param {Express.Application} app - The Express application object.
@@ -74,7 +74,6 @@ const AppService = async (app) => {
   const socialLogins =
     config?.registration?.socialLogins ?? configDefaults?.registration?.socialLogins;
   const interfaceConfig = await loadDefaultInterface(config, configDefaults);
-  const turnstileConfig = loadTurnstileConfig(config, configDefaults);
 
   const defaultLocals = {
     ocr,
@@ -86,7 +85,6 @@ const AppService = async (app) => {
     availableTools,
     imageOutputType,
     interfaceConfig,
-    turnstileConfig,
     balance,
   };
 

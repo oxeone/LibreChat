@@ -30,7 +30,6 @@ import type {
   SharedLinksResponse,
 } from 'librechat-data-provider';
 import type { ConversationCursorData } from '~/utils/convos';
-import { findConversationInInfinite } from '~/utils';
 
 export const useGetPresetsQuery = (
   config?: UseQueryOptions<TPreset[]>,
@@ -69,13 +68,14 @@ export const useGetConvoIdQuery = (
     [QueryKeys.conversation, id],
     () => {
       // Try to find in all fetched infinite pages
-      const convosQuery = queryClient.getQueryData<InfiniteData<ConversationCursorData>>(
-        [QueryKeys.allConversations],
-        { exact: false },
-      );
-      const found = findConversationInInfinite(convosQuery, id);
+      const convosQuery = queryClient.getQueryData<InfiniteData<ConversationCursorData>>([
+        QueryKeys.allConversations,
+      ]);
+      const found = convosQuery?.pages
+        .flatMap((page) => page.conversations)
+        .find((c) => c.conversationId === id);
 
-      if (found && found.messages != null) {
+      if (found) {
         return found;
       }
       // Otherwise, fetch from API

@@ -136,7 +136,7 @@ function getLLMConfig(apiKey, options = {}, endpoint = null) {
     Object.assign(llmConfig, azure);
     llmConfig.model = llmConfig.azureOpenAIApiDeploymentName;
   } else {
-    llmConfig.apiKey = apiKey;
+    llmConfig.openAIApiKey = apiKey;
     // Object.assign(llmConfig, {
     //   configuration: { apiKey },
     // });

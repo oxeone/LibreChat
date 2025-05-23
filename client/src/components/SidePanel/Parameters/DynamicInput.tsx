@@ -12,6 +12,7 @@ function DynamicInput({
   settingKey,
   defaultValue,
   description = '',
+  type = 'string',
   columnSpan,
   setOption,
   optionType,
@@ -27,7 +28,7 @@ function DynamicInput({
   const { preset } = useChatContext();
 
   const [setInputValue, inputValue, setLocalValue] = useDebouncedInput<string | number>({
-    optionKey: settingKey,
+    optionKey: optionType !== OptionTypes.Custom ? settingKey : undefined,
     initialValue: optionType !== OptionTypes.Custom ? conversation?.[settingKey] : defaultValue,
     setter: () => ({}),
     setOption,
@@ -43,7 +44,17 @@ function DynamicInput({
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e, !isNaN(Number(e.target.value)));
+    const value = e.target.value;
+    if (type !== 'number') {
+      setInputValue(e);
+      return;
+    }
+
+    if (value === '') {
+      setInputValue(e);
+    } else if (!isNaN(Number(value))) {
+      setInputValue(e, true);
+    }
   };
 
   return (

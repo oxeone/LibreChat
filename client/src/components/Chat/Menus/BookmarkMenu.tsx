@@ -160,7 +160,6 @@ const BookmarkMenu: FC = () => {
         focusLoop={true}
         menuId={menuId}
         isOpen={isMenuOpen}
-        unmountOnHide={true}
         setIsOpen={setIsMenuOpen}
         keyPrefix={`${conversationId}-bookmark-`}
         trigger={

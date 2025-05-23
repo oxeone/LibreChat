@@ -119,7 +119,6 @@ const AttachFile = ({ disabled }: AttachFileProps) => {
         isOpen={isPopoverActive}
         setIsOpen={setIsPopoverActive}
         modal={true}
-        unmountOnHide={true}
         trigger={menuTrigger}
         items={dropdownItems}
         iconClassName="mr-0"

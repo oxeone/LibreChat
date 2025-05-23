@@ -428,8 +428,6 @@ const chatV2 = async (req, res) => {
       thread_id,
       model: assistant_id,
       endpoint,
-      spec: endpointOption.spec,
-      iconURL: endpointOption.iconURL,
     };
 
     sendMessage(res, {

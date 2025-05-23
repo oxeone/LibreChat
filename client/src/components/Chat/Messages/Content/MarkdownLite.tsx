@@ -13,7 +13,7 @@ import { langSubset } from '~/utils';
 const MarkdownLite = memo(
   ({ content = '', codeExecution = true }: { content?: string; codeExecution?: boolean }) => {
     const rehypePlugins: PluggableList = [
-      [rehypeKatex],
+      [rehypeKatex, { output: 'mathml' }],
       [
         rehypeHighlight,
         {

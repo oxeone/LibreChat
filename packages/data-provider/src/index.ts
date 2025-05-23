@@ -36,4 +36,3 @@ import * as dataService from './data-service';
 export * from './utils';
 export * from './actions';
 export { default as createPayload } from './createPayload';
-export * from './parameterSettings';

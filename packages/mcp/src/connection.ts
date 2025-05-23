@@ -1,15 +1,10 @@
 import { EventEmitter } from 'events';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import {
-  StdioClientTransport,
-  getDefaultEnvironment,
-} from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { WebSocketClientTransport } from '@modelcontextprotocol/sdk/client/websocket.js';
 import { ResourceListChangedNotificationSchema } from '@modelcontextprotocol/sdk/types.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
 import type { Logger } from 'winston';
 import type * as t from './types/mcp.js';
 
@@ -27,24 +22,6 @@ function isWebSocketOptions(options: t.MCPOptions): options is t.WebSocketOption
 
 function isSSEOptions(options: t.MCPOptions): options is t.SSEOptions {
   if ('url' in options) {
-    const protocol = new URL(options.url).protocol;
-    return protocol !== 'ws:' && protocol !== 'wss:';
-  }
-  return false;
-}
-
-/**
- * Checks if the provided options are for a Streamable HTTP transport.
- *
- * Streamable HTTP is an MCP transport that uses HTTP POST for sending messages
- * and supports streaming responses. It provides better performance than
- * SSE transport while maintaining compatibility with most network environments.
- *
- * @param options MCP connection options to check
- * @returns True if options are for a streamable HTTP transport
- */
-function isStreamableHTTPOptions(options: t.MCPOptions): options is t.StreamableHTTPOptions {
-  if ('url' in options && options.type === 'streamable-http') {
     const protocol = new URL(options.url).protocol;
     return protocol !== 'ws:' && protocol !== 'wss:';
   }
@@ -88,7 +65,7 @@ export class MCPConnection extends EventEmitter {
     this.client = new Client(
       {
         name: 'librechat-mcp-client',
-        version: '1.2.2',
+        version: '1.2.0',
       },
       {
         capabilities: {},
@@ -140,8 +117,6 @@ export class MCPConnection extends EventEmitter {
         type = 'stdio';
       } else if (isWebSocketOptions(options)) {
         type = 'websocket';
-      } else if (isStreamableHTTPOptions(options)) {
-        type = 'streamable-http';
       } else if (isSSEOptions(options)) {
         type = 'sse';
       } else {
@@ -158,9 +133,7 @@ export class MCPConnection extends EventEmitter {
           return new StdioClientTransport({
             command: options.command,
             args: options.args,
-            // workaround bug of mcp sdk that can't pass env:
-            // https://github.com/modelcontextprotocol/typescript-sdk/issues/216
-            env: { ...getDefaultEnvironment(), ...(options.env ?? {}) },
+            env: options.env,
           });
 
         case 'websocket':
@@ -181,15 +154,6 @@ export class MCPConnection extends EventEmitter {
               headers: options.headers,
               signal: abortController.signal,
             },
-            eventSourceInit: {
-              fetch: (url, init) => {
-                const headers = new Headers(Object.assign({}, init?.headers, options.headers));
-                return fetch(url, {
-                  ...init,
-                  headers,
-                });
-              },
-            },
           });
 
           transport.onclose = () => {
@@ -203,43 +167,6 @@ export class MCPConnection extends EventEmitter {
           };
 
           transport.onmessage = (message) => {
-            this.logger?.info(
-              `${this.getLogPrefix()} Message received: ${JSON.stringify(message)}`,
-            );
-          };
-
-          this.setupTransportErrorHandlers(transport);
-          return transport;
-        }
-
-        case 'streamable-http': {
-          if (!isStreamableHTTPOptions(options)) {
-            throw new Error('Invalid options for streamable-http transport.');
-          }
-          const url = new URL(options.url);
-          this.logger?.info(
-            `${this.getLogPrefix()} Creating streamable-http transport: ${url.toString()}`,
-          );
-          const abortController = new AbortController();
-
-          const transport = new StreamableHTTPClientTransport(url, {
-            requestInit: {
-              headers: options.headers,
-              signal: abortController.signal,
-            },
-          });
-
-          transport.onclose = () => {
-            this.logger?.info(`${this.getLogPrefix()} Streamable-http transport closed`);
-            this.emit('connectionChange', 'disconnected');
-          };
-
-          transport.onerror = (error: Error | unknown) => {
-            this.logger?.error(`${this.getLogPrefix()} Streamable-http transport error:`, error);
-            this.emitError(error, 'Streamable-http transport error:');
-          };
-
-          transport.onmessage = (message: JSONRPCMessage) => {
             this.logger?.info(
               `${this.getLogPrefix()} Message received: ${JSON.stringify(message)}`,
             );
@@ -567,14 +494,8 @@ export class MCPConnection extends EventEmitter {
     return this.connectionState;
   }
 
-  public async isConnected(): Promise<boolean> {
-    try {
-      await this.client.ping();
-      return this.connectionState === 'connected';
-    } catch (error) {
-      this.logger?.error(`${this.getLogPrefix()} Ping failed:`, error);
-      return false;
-    }
+  public isConnected(): boolean {
+    return this.connectionState === 'connected';
   }
 
   public getLastError(): Error | null {

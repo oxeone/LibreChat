@@ -1,6 +1,5 @@
 const { z } = require('zod');
 const { tool } = require('@langchain/core/tools');
-const { normalizeServerName } = require('librechat-mcp');
 const { Constants: AgentConstants, Providers } = require('@librechat/agents');
 const {
   Constants,
@@ -39,7 +38,6 @@ async function createMCPTool({ req, toolKey, provider: _provider }) {
   }
 
   const [toolName, serverName] = toolKey.split(Constants.mcp_delimiter);
-  const normalizedToolKey = `${toolName}${Constants.mcp_delimiter}${normalizeServerName(serverName)}`;
 
   if (!req.user?.id) {
     logger.error(
@@ -85,7 +83,7 @@ async function createMCPTool({ req, toolKey, provider: _provider }) {
 
   const toolInstance = tool(_call, {
     schema,
-    name: normalizedToolKey,
+    name: toolKey,
     description: description || '',
     responseFormat: AgentConstants.CONTENT_AND_ARTIFACT,
   });

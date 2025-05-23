@@ -12,7 +12,7 @@ import store from '~/store';
 
 export default function Presentation({ children }: { children: React.ReactNode }) {
   const artifacts = useRecoilValue(store.artifactsState);
-  const artifactsVisibility = useRecoilValue(store.artifactsVisibility);
+  const artifactsVisible = useRecoilValue(store.artifactsVisible);
 
   const setFilesToDelete = useSetFilesToDelete();
 
@@ -64,7 +64,7 @@ export default function Presentation({ children }: { children: React.ReactNode }
         fullPanelCollapse={fullCollapse}
         defaultCollapsed={defaultCollapsed}
         artifacts={
-          artifactsVisibility === true && Object.keys(artifacts ?? {}).length > 0 ? (
+          artifactsVisible === true && Object.keys(artifacts ?? {}).length > 0 ? (
             <EditorProvider>
               <Artifacts />
             </EditorProvider>

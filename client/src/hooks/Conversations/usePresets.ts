@@ -58,11 +58,10 @@ export default function usePresets() {
     }
     setDefaultPreset(defaultPreset);
     if (!conversation?.conversationId || conversation.conversationId === 'new') {
-      newConversation({ preset: defaultPreset, modelsData, disableParams: true });
+      newConversation({ preset: defaultPreset, modelsData });
     }
     hasLoaded.current = true;
     // dependencies are stable and only needed once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presetsQuery.data, user, modelsData]);
 
   const setPresets = useCallback(
@@ -103,7 +102,7 @@ export default function usePresets() {
       if (data.defaultPreset && data.presetId !== _defaultPreset?.presetId) {
         message = `${toastTitle} ${localize('com_endpoint_preset_default')}`;
         setDefaultPreset(data);
-        newConversation({ preset: data, disableParams: true });
+        newConversation({ preset: data });
       } else if (preset.defaultPreset === false) {
         setDefaultPreset(null);
         message = `${toastTitle} ${localize('com_endpoint_preset_default_removed')}`;
@@ -186,7 +185,6 @@ export default function usePresets() {
     newPreset.iconURL = newPreset.iconURL ?? null;
     newPreset.modelLabel = newPreset.modelLabel ?? null;
     const isModular = isCurrentModular && isNewModular && shouldSwitch;
-    const disableParams = newPreset.defaultPreset === true;
     if (isExistingConversation && isModular) {
       const currentConvo = getDefaultConversation({
         /* target endpointType is necessary to avoid endpoint mixing */
@@ -207,12 +205,11 @@ export default function usePresets() {
         preset: currentConvo,
         keepLatestMessage: true,
         keepAddedConvos: true,
-        disableParams,
       });
       return;
     }
 
-    newConversation({ preset: newPreset, keepAddedConvos: isModular, disableParams });
+    newConversation({ preset: newPreset, keepAddedConvos: isModular });
   };
 
   const onChangePreset = (preset: TPreset) => {

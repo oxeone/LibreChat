@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
+import { OptionTypes } from 'librechat-data-provider';
 import type { DynamicSettingProps } from 'librechat-data-provider';
 import { Label, HoverCard, HoverCardTrigger } from '~/components/ui';
 import ControlCombobox from '~/components/ui/ControlCombobox';
@@ -15,6 +16,7 @@ function DynamicCombobox({
   description = '',
   columnSpan,
   setOption,
+  optionType,
   options: _options,
   items: _items,
   showLabel = true,
@@ -34,8 +36,11 @@ function DynamicCombobox({
   const [inputValue, setInputValue] = useState<string | null>(null);
 
   const selectedValue = useMemo(() => {
+    if (optionType === OptionTypes.Custom) {
+      return inputValue;
+    }
     return conversation?.[settingKey] ?? defaultValue;
-  }, [conversation, defaultValue, settingKey]);
+  }, [conversation, defaultValue, optionType, settingKey, inputValue]);
 
   const items = useMemo(() => {
     if (_items != null) {
@@ -49,10 +54,13 @@ function DynamicCombobox({
 
   const handleChange = useCallback(
     (value: string) => {
-      setInputValue(value);
-      setOption(settingKey)(value);
+      if (optionType === OptionTypes.Custom) {
+        setInputValue(value);
+      } else {
+        setOption(settingKey)(value);
+      }
     },
-    [setOption, settingKey],
+    [optionType, setOption, settingKey],
   );
 
   useParameterEffects({

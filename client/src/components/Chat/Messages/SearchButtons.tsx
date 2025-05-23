@@ -13,7 +13,7 @@ export default function SearchButtons({ message }: { message: TMessage }) {
   const localize = useLocalize();
   const queryClient = useQueryClient();
   const search = useRecoilValue(store.search);
-  const { navigateToConvo } = useNavigateToConvo();
+  const { navigateWithLastTools } = useNavigateToConvo();
   const conversationId = message.conversationId ?? '';
 
   const clickHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -39,13 +39,14 @@ export default function SearchButtons({ message }: { message: TMessage }) {
     }
 
     document.title = title;
-    navigateToConvo(
+    navigateWithLastTools(
       cachedConvo ??
         ({
           conversationId,
           title,
         } as TConversation),
-      { resetLatestMessage: true },
+      true,
+      true,
     );
   };
 

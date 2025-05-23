@@ -71,7 +71,7 @@ export class MCPManager {
           const connectionAttempt = this.initializeServer(connection, `[MCP][${serverName}]`);
           await Promise.race([connectionAttempt, connectionTimeout]);
 
-          if (await connection.isConnected()) {
+          if (connection.isConnected()) {
             initializedServers.add(i);
             this.connections.set(serverName, connection); // Store in app-level map
 
@@ -135,7 +135,7 @@ export class MCPManager {
     while (attempts < maxAttempts) {
       try {
         await connection.connect();
-        if (await connection.isConnected()) {
+        if (connection.isConnected()) {
           return;
         }
         throw new Error('Connection attempt succeeded but status is not connected');
@@ -200,7 +200,7 @@ export class MCPManager {
       }
       connection = undefined; // Force creation of a new connection
     } else if (connection) {
-      if (await connection.isConnected()) {
+      if (connection.isConnected()) {
         this.logger.debug(`[MCP][User: ${userId}][${serverName}] Reusing active connection`);
         // Update timestamp on reuse
         this.updateUserLastActivity(userId);
@@ -244,7 +244,7 @@ export class MCPManager {
       );
       await Promise.race([connectionAttempt, connectionTimeout]);
 
-      if (!(await connection.isConnected())) {
+      if (!connection.isConnected()) {
         throw new Error('Failed to establish connection after initialization attempt.');
       }
 
@@ -342,7 +342,7 @@ export class MCPManager {
   public async mapAvailableTools(availableTools: t.LCAvailableTools): Promise<void> {
     for (const [serverName, connection] of this.connections.entries()) {
       try {
-        if ((await connection.isConnected()) !== true) {
+        if (connection.isConnected() !== true) {
           this.logger.warn(
             `[MCP][${serverName}] Connection not established. Skipping tool mapping.`,
           );
@@ -370,12 +370,10 @@ export class MCPManager {
   /**
    * Loads tools from all app-level connections into the manifest.
    */
-  public async loadManifestTools(manifestTools: t.LCToolManifest): Promise<t.LCToolManifest> {
-    const mcpTools: t.LCManifestTool[] = [];
-
+  public async loadManifestTools(manifestTools: t.LCToolManifest): Promise<void> {
     for (const [serverName, connection] of this.connections.entries()) {
       try {
-        if ((await connection.isConnected()) !== true) {
+        if (connection.isConnected() !== true) {
           this.logger.warn(
             `[MCP][${serverName}] Connection not established. Skipping manifest loading.`,
           );
@@ -385,24 +383,17 @@ export class MCPManager {
         const tools = await connection.fetchTools();
         for (const tool of tools) {
           const pluginKey = `${tool.name}${CONSTANTS.mcp_delimiter}${serverName}`;
-          const manifestTool: t.LCManifestTool = {
+          manifestTools.push({
             name: tool.name,
             pluginKey,
             description: tool.description ?? '',
             icon: connection.iconPath,
-          };
-          const config = this.mcpConfigs[serverName];
-          if (config?.chatMenu === false) {
-            manifestTool.chatMenu = false;
-          }
-          mcpTools.push(manifestTool);
+          });
         }
       } catch (error) {
         this.logger.error(`[MCP][${serverName}] Error fetching tools for manifest:`, error);
       }
     }
-
-    return [...mcpTools, ...manifestTools];
   }
 
   /**
@@ -443,7 +434,7 @@ export class MCPManager {
         }
       }
 
-      if (!(await connection.isConnected())) {
+      if (!connection.isConnected()) {
         // This might happen if getUserConnection failed silently or app connection dropped
         throw new McpError(
           ErrorCode.InternalError, // Use InternalError for connection issues

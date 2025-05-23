@@ -5,8 +5,6 @@ const BaseOptionsSchema = z.object({
   iconPath: z.string().optional(),
   timeout: z.number().optional(),
   initTimeout: z.number().optional(),
-  /** Controls visibility in chat dropdown menu (MCPSelect) */
-  chatMenu: z.boolean().optional(),
 });
 
 export const StdioOptionsSchema = BaseOptionsSchema.extend({
@@ -53,10 +51,9 @@ export const WebSocketOptionsSchema = BaseOptionsSchema.extend({
   type: z.literal('websocket').optional(),
   url: z
     .string()
-    .transform((val: string) => extractEnvVariable(val))
-    .pipe(z.string().url())
+    .url()
     .refine(
-      (val: string) => {
+      (val) => {
         const protocol = new URL(val).protocol;
         return protocol === 'ws:' || protocol === 'wss:';
       },
@@ -71,10 +68,9 @@ export const SSEOptionsSchema = BaseOptionsSchema.extend({
   headers: z.record(z.string(), z.string()).optional(),
   url: z
     .string()
-    .transform((val: string) => extractEnvVariable(val))
-    .pipe(z.string().url())
+    .url()
     .refine(
-      (val: string) => {
+      (val) => {
         const protocol = new URL(val).protocol;
         return protocol !== 'ws:' && protocol !== 'wss:';
       },
@@ -84,29 +80,10 @@ export const SSEOptionsSchema = BaseOptionsSchema.extend({
     ),
 });
 
-export const StreamableHTTPOptionsSchema = BaseOptionsSchema.extend({
-  type: z.literal('streamable-http'),
-  headers: z.record(z.string(), z.string()).optional(),
-  url: z
-    .string()
-    .transform((val: string) => extractEnvVariable(val))
-    .pipe(z.string().url())
-    .refine(
-      (val: string) => {
-        const protocol = new URL(val).protocol;
-        return protocol !== 'ws:' && protocol !== 'wss:';
-      },
-      {
-        message: 'Streamable HTTP URL must not start with ws:// or wss://',
-      },
-    ),
-});
-
 export const MCPOptionsSchema = z.union([
   StdioOptionsSchema,
   WebSocketOptionsSchema,
   SSEOptionsSchema,
-  StreamableHTTPOptionsSchema,
 ]);
 
 export const MCPServersSchema = z.record(z.string(), MCPOptionsSchema);
@@ -119,34 +96,28 @@ export type MCPOptions = z.infer<typeof MCPOptionsSchema>;
  * @param {string} [userId] - The user ID
  * @returns {MCPOptions} - The processed object with environment variables replaced
  */
-export function processMCPEnv(obj: Readonly<MCPOptions>, userId?: string): MCPOptions {
+export function processMCPEnv(obj: MCPOptions, userId?: string): MCPOptions {
   if (obj === null || obj === undefined) {
     return obj;
   }
 
-  const newObj: MCPOptions = structuredClone(obj);
-
-  if ('env' in newObj && newObj.env) {
+  if ('env' in obj && obj.env) {
     const processedEnv: Record<string, string> = {};
-    for (const [key, value] of Object.entries(newObj.env)) {
+    for (const [key, value] of Object.entries(obj.env)) {
       processedEnv[key] = extractEnvVariable(value);
     }
-    newObj.env = processedEnv;
-  } else if ('headers' in newObj && newObj.headers) {
+    obj.env = processedEnv;
+  } else if ('headers' in obj && obj.headers) {
     const processedHeaders: Record<string, string> = {};
-    for (const [key, value] of Object.entries(newObj.headers)) {
+    for (const [key, value] of Object.entries(obj.headers)) {
       if (value === '{{LIBRECHAT_USER_ID}}' && userId != null && userId) {
         processedHeaders[key] = userId;
         continue;
       }
       processedHeaders[key] = extractEnvVariable(value);
     }
-    newObj.headers = processedHeaders;
+    obj.headers = processedHeaders;
   }
 
-  if ('url' in newObj && newObj.url) {
-    newObj.url = extractEnvVariable(newObj.url);
-  }
-
-  return newObj;
+  return obj;
 }

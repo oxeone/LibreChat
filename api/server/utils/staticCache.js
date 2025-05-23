@@ -14,7 +14,6 @@ const staticCache = (staticPath) =>
         res.setHeader('Cache-Control', `public, max-age=${maxAge}, s-maxage=${sMaxAge}`);
       }
     },
-    index: false,
   });
 
 module.exports = staticCache;

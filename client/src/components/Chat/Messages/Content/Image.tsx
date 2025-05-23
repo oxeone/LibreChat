@@ -1,8 +1,27 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { cn, scaleImage } from '~/utils';
+import * as Dialog from '@radix-ui/react-dialog';
 import DialogImage from './DialogImage';
-import { Skeleton } from '~/components';
+import { cn } from '~/utils';
+
+const scaleImage = ({
+  originalWidth,
+  originalHeight,
+  containerRef,
+}: {
+  originalWidth?: number;
+  originalHeight?: number;
+  containerRef: React.RefObject<HTMLDivElement>;
+}) => {
+  const containerWidth = containerRef.current?.offsetWidth ?? 0;
+  if (containerWidth === 0 || originalWidth == null || originalHeight == null) {
+    return { width: 'auto', height: 'auto' };
+  }
+  const aspectRatio = originalWidth / originalHeight;
+  const scaledWidth = Math.min(containerWidth, originalWidth);
+  const scaledHeight = scaledWidth / aspectRatio;
+  return { width: `${scaledWidth}px`, height: `${scaledHeight}px` };
+};
 
 const Image = ({
   imagePath,
@@ -22,7 +41,6 @@ const Image = ({
   };
   className?: string;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -38,63 +56,39 @@ const Image = ({
     [placeholderDimensions, height, width],
   );
 
-  const downloadImage = () => {
-    const link = document.createElement('a');
-    link.href = imagePath;
-    link.download = altText;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
-    <div ref={containerRef}>
-      <div
-        className={cn(
-          'relative mt-1 flex h-auto w-full max-w-lg items-center justify-center overflow-hidden rounded-lg border border-border-light text-text-secondary-alt shadow-md',
-          className,
-        )}
-      >
-        <button
-          type="button"
-          aria-label={`View ${altText} in dialog`}
-          onClick={() => setIsOpen(true)}
-          className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    <Dialog.Root>
+      <div ref={containerRef}>
+        <div
+          className={cn(
+            'relative mt-1 flex h-auto w-full max-w-lg items-center justify-center overflow-hidden bg-surface-active-alt text-text-secondary-alt',
+            className,
+          )}
         >
-          <LazyLoadImage
-            alt={altText}
-            onLoad={handleImageLoad}
-            visibleByDefault={true}
-            className={cn(
-              'opacity-100 transition-opacity duration-100',
-              isLoaded ? 'opacity-100' : 'opacity-0',
-            )}
-            src={imagePath}
-            style={{
-              width: `${scaledWidth}`,
-              height: 'auto',
-              color: 'transparent',
-              display: 'block',
-            }}
-            placeholder={
-              <Skeleton
-                className={cn('h-auto w-full', `h-[${scaledHeight}] w-[${scaledWidth}]`)}
-                aria-label="Loading image"
-                aria-busy="true"
+          <Dialog.Trigger asChild>
+            <button type="button" aria-haspopup="dialog" aria-expanded="false">
+              <LazyLoadImage
+                alt={altText}
+                onLoad={handleImageLoad}
+                visibleByDefault={true}
+                className={cn(
+                  'opacity-100 transition-opacity duration-100',
+                  isLoaded ? 'opacity-100' : 'opacity-0',
+                )}
+                src={imagePath}
+                style={{
+                  width: scaledWidth,
+                  height: 'auto',
+                  color: 'transparent',
+                }}
+                placeholder={<div style={{ width: scaledWidth, height: scaledHeight }} />}
               />
-            }
-          />
-        </button>
-        {isLoaded && (
-          <DialogImage
-            isOpen={isOpen}
-            onOpenChange={setIsOpen}
-            src={imagePath}
-            downloadImage={downloadImage}
-          />
-        )}
+            </button>
+          </Dialog.Trigger>
+        </div>
       </div>
-    </div>
+      {isLoaded && <DialogImage src={imagePath} height={height} width={width} />}
+    </Dialog.Root>
   );
 };
 

@@ -46,12 +46,6 @@ jest.mock('./ToolService', () => ({
     },
   }),
 }));
-jest.mock('./start/turnstile', () => ({
-  loadTurnstileConfig: jest.fn(() => ({
-    siteKey: 'default-site-key',
-    options: {},
-  })),
-}));
 
 const azureGroups = [
   {
@@ -92,10 +86,6 @@ const azureGroups = [
 
 describe('AppService', () => {
   let app;
-  const mockedTurnstileConfig = {
-    siteKey: 'default-site-key',
-    options: {},
-  };
 
   beforeEach(() => {
     app = { locals: {} };
@@ -117,7 +107,6 @@ describe('AppService', () => {
         sidePanel: true,
         presets: true,
       }),
-      turnstileConfig: mockedTurnstileConfig,
       modelSpecs: undefined,
       availableTools: {
         ExampleTool: {

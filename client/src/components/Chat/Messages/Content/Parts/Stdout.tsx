@@ -17,7 +17,7 @@ const Stdout: React.FC<StdoutProps> = ({ output = '' }) => {
   return (
     processedContent && (
       <pre className="shrink-0">
-        <div className="text-text-primary">{processedContent}</div>
+        <div>{processedContent}</div>
       </pre>
     )
   );

@@ -11,16 +11,8 @@ export default function useFocusChatEffect(textAreaRef: React.RefObject<HTMLText
         'conversation',
         `Focusing textarea on location state change: ${location.pathname}`,
       );
-
-      /** Check if the device is not a touchscreen */
-      if (!window.matchMedia?.('(pointer: coarse)').matches) {
-        textAreaRef.current?.focus();
-      }
-
-      navigate(`${location.pathname}${window.location.search ?? ''}`, {
-        replace: true,
-        state: {},
-      });
+      textAreaRef.current?.focus();
+      navigate(`${location.pathname}${location.search ?? ''}`, { replace: true, state: {} });
     }
-  }, [navigate, textAreaRef, location.pathname, location.state?.focusChat]);
+  }, [navigate, textAreaRef, location.pathname, location.state?.focusChat, location.search]);
 }

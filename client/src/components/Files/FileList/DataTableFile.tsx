@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { ListFilter } from 'lucide-react';
-import { useSetRecoilState } from 'recoil';
 import {
   flexRender,
   getCoreRowModel,
@@ -19,25 +18,24 @@ import { FileContext } from 'librechat-data-provider';
 import type { AugmentedColumnDef } from '~/common';
 import type { TFile } from 'librechat-data-provider';
 import {
+  Button,
   Input,
   Table,
-  Button,
-  TableRow,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
+  TableRow,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
 } from '~/components/ui';
-import ActionButton from '~/components/Files/ActionButton';
 import { useDeleteFilesFromTable } from '~/hooks/Files';
 import { TrashIcon, Spinner } from '~/components/svg';
-import UploadFileButton from './UploadFileButton';
 import useLocalize from '~/hooks/useLocalize';
-import store from '~/store';
+import ActionButton from '../ActionButton';
+import UploadFileButton from './UploadFileButton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,14 +57,12 @@ export default function DataTableFile<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const localize = useLocalize();
-  const setFiles = useSetRecoilState(store.filesByIndex(0));
   const [isDeleting, setIsDeleting] = React.useState(false);
-  const { deleteFiles } = useDeleteFilesFromTable(() => setIsDeleting(false));
-
   const [rowSelection, setRowSelection] = React.useState({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const { deleteFiles } = useDeleteFilesFromTable(() => setIsDeleting(false));
 
   const table = useReactTable({
     data,
@@ -91,7 +87,7 @@ export default function DataTableFile<TData, TValue>({
     <>
       <div className="mt-2 flex flex-col items-start">
         <h2 className="text-lg">
-          <strong>{localize('com_ui_files')}</strong>
+          <strong>Files</strong>
         </h2>
         <div className="mt-3 flex w-full flex-col-reverse justify-between md:flex-row">
           <div className="mt-3 flex w-full flex-row justify-center gap-x-3 md:m-0 md:justify-start">
@@ -107,7 +103,7 @@ export default function DataTableFile<TData, TValue>({
                 const filesToDelete = table
                   .getFilteredSelectedRowModel()
                   .rows.map((row) => row.original);
-                deleteFiles({ files: filesToDelete as TFile[], setFiles });
+                deleteFiles({ files: filesToDelete as TFile[] });
                 setRowSelection({});
               }}
               className="ml-1 gap-2 dark:hover:bg-gray-850/25 sm:ml-0"
@@ -246,11 +242,13 @@ export default function DataTableFile<TData, TValue>({
         </Table>
       </div>
       <div className="ml-4 mr-4 mt-4 flex h-auto items-center justify-end space-x-2 py-4 sm:ml-0 sm:mr-0 sm:h-0">
-        <div className="ml-2 flex-1 text-sm text-muted-foreground">
-          {localize('com_files_number_selected', {
-            0: `${table.getFilteredSelectedRowModel().rows.length}`,
-            1: `${table.getFilteredRowModel().rows.length}`,
-          })}
+        <div className="text-muted-foreground ml-2 flex-1 text-sm">
+          {localize(
+            'com_files_number_selected', {
+              0: `${table.getFilteredSelectedRowModel().rows.length}`,
+              1: `${table.getFilteredRowModel().rows.length}`,
+            },
+          )}
         </div>
         <Button
           className="dark:border-gray-500 dark:hover:bg-gray-600"

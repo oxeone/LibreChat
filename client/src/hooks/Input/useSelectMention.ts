@@ -225,7 +225,6 @@ export default function useSelectMention({
       newPreset.iconURL = newPreset.iconURL ?? null;
       newPreset.modelLabel = newPreset.modelLabel ?? null;
       const isModular = isCurrentModular && isNewModular && shouldSwitch;
-      const disableParams = newPreset.defaultPreset === true;
       if (isExistingConversation && isModular) {
         template.endpointType = newEndpointType as EModelEndpoint | undefined;
         template.spec = null;
@@ -245,17 +244,12 @@ export default function useSelectMention({
           preset: newPreset,
           keepLatestMessage: true,
           keepAddedConvos: true,
-          disableParams,
         });
         return;
       }
 
       logger.info('conversation', 'Switching conversation to new preset', template);
-      newConversation({
-        preset: newPreset,
-        keepAddedConvos: isModular,
-        disableParams,
-      });
+      newConversation({ preset: newPreset, keepAddedConvos: isModular });
     },
     [
       modularChat,

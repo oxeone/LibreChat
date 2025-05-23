@@ -10,7 +10,17 @@ const getLogStores = require('~/cache/getLogStores');
  * */
 async function getCustomConfig() {
   const cache = getLogStores(CacheKeys.CONFIG_STORE);
-  return (await cache.get(CacheKeys.CUSTOM_CONFIG)) || (await loadCustomConfig());
+  let customConfig = await cache.get(CacheKeys.CUSTOM_CONFIG);
+
+  if (!customConfig) {
+    customConfig = await loadCustomConfig();
+  }
+
+  if (!customConfig) {
+    return null;
+  }
+
+  return customConfig;
 }
 
 /**

@@ -235,11 +235,10 @@ function ConvoOptions({
         <DeleteButton
           title={title ?? ''}
           retainView={retainView}
-          triggerRef={deleteButtonRef}
-          setMenuOpen={setIsPopoverActive}
-          showDeleteDialog={showDeleteDialog}
           conversationId={conversationId ?? ''}
+          showDeleteDialog={showDeleteDialog}
           setShowDeleteDialog={setShowDeleteDialog}
+          triggerRef={deleteButtonRef}
         />
       )}
     </>
