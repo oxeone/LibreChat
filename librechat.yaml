@@ -93,13 +93,13 @@ modelSpecs:
       preset:
         endpoint: "google"
         model: "gemini-2.5-pro-exp-03-25"
-    - name: "claude-3-7-sonnet-20250219"
-      label: "Claude 3.7 Sonnet"
-      description: "Anthropic's Claude 3.7 Sonnet model excels in complex problem-solving with advanced reasoning capabilities."
+    - name: "claude-sonnet-4-20250514"
+      label: "Claude 4 Sonnet"
+      description: "Anthropic's Claude 4 Sonnet model excels in complex problem-solving with advanced reasoning capabilities."
       iconURL: "/assets/claude.svg"
       preset:
         endpoint: "anthropic"
-        model: "claude-3-7-sonnet-20250219"
+        model: "claude-sonnet-4-20250514"
     - name: "sonar"
       label: "Perplexity - Sonar"
       description: "Perplexity's Sonar model for real-time, web-wide research and Q&A capabilities."
