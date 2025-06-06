@@ -83,6 +83,8 @@ modelSpecs:
       preset:
         endpoint: "agents"
         agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
+        greeting: |
+          Kan bruger værktøjer og har adgang til Marginal dokumenter.
     - name: "gpt-4.1"
       label: "OpenAI - GPT-4 Omni"
       description: "OpenAI's GPT-4 Omni model capable of processing text, audio, and images."
@@ -114,21 +116,6 @@ modelSpecs:
       preset:
         endpoint: "perplexity"
         model: "sonar"
-    - name: "sonar-small-chat"
-      label: "Perplexity - Sonar Small Chat"
-      description: "Lightweight model optimized for fast, real-time responses."
-      iconURL: "/assets/perplexity.svg"
-      preset:
-        endpoint: "perplexity"
-        model: "sonar-small-chat"
-
-    - name: "sonar-medium-chat"
-      label: "Perplexity - Sonar Medium Chat"
-      description: "Balanced model offering enhanced accuracy and speed."
-      iconURL: "/assets/perplexity.svg"
-      preset:
-        endpoint: "perplexity"
-        model: "sonar-medium-chat"
 
     # Cohere Models
     - name: "command-r"
