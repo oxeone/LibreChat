@@ -76,6 +76,14 @@ modelSpecs:
   enforce: false
   prioritize: false
   list:
+      - name: "Marginal Agent"
+      label: "Marginal Agent"
+      description: "Kan bruger værktøjer og har adgang til Marginal dokumenter."
+      iconURL: "/assets/logo.svg"
+      preset:
+        endpoint: "agents"
+        agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
+        greeting: "Denne agent har adgang til en lang række værktøjer i Marginal.
     - name: "gpt-4.1"
       label: "OpenAI - GPT-4 Omni"
       description: "OpenAI's GPT-4 Omni model capable of processing text, audio, and images."
@@ -107,17 +115,6 @@ modelSpecs:
       preset:
         endpoint: "perplexity"
         model: "sonar"
-    - name: "Marginal Agent"
-      label: "Marginal Agent - (demo)"
-      description: "Analytics, ActiveCampaign, Drive, Sheets, CVR, Trustpilot, Get website, Get Google Map ... "
-      iconURL: "/assets/logo.svg"
-      preset:
-        endpoint: "agents"
-        agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
-        greeting: "Denne agent har adgnag til en lang række værktøjer i Marginal.
-          - Drive
-          - Analytics
-          - Tools"  
     - name: "sonar-small-chat"
       label: "Perplexity - Sonar Small Chat"
       description: "Lightweight model optimized for fast, real-time responses."

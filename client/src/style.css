@@ -2685,7 +2685,7 @@ main .contentinfo {
 display:none !important;
   
 }
-
+/*
 .light #chat-history-nav, .light  .bg-surface-primary-alt {
 background: #b5c4b5 !important;
   
@@ -2702,7 +2702,7 @@ background: #b5c4b5 !important;
 background: #b5c4b5 !important;
   
 }
-
+*/
 .light .sidenav .bg-token-sidebar-surface-primary button {
   border:none !important;
   background: #f8f8f857 !important;
@@ -2719,6 +2719,7 @@ header{
    display:none !important;
 }
 
+/*
 #root > div:first-of-type::before {
   content: "";
   position: absolute;
@@ -2729,7 +2730,7 @@ header{
   opacity: 0.3; 
   z-index: -1;
 }
-
+*/
 
 @keyframes shimmer {
   0% {
