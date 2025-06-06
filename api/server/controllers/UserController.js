@@ -1,7 +1,6 @@
 const { FileSources } = require('librechat-data-provider');
 const {
   Tools,
-  FileSources,
   webSearchKeys,
   extractWebSearchEnvVars,
 } = require('librechat-data-provider');
