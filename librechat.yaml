@@ -83,7 +83,7 @@ modelSpecs:
       preset:
         endpoint: "agents"
         agent_id: "agent_Spc26zbmaj2FcADOrk1GY"
-        greeting: "Denne agent har adgang til en lang række værktøjer i Marginal.
+        greeting: "Denne agent har adgang til en lang række værktøjer i Marginal."
     - name: "gpt-4.1"
       label: "OpenAI - GPT-4 Omni"
       description: "OpenAI's GPT-4 Omni model capable of processing text, audio, and images."
